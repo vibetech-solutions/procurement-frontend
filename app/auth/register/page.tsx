@@ -371,13 +371,18 @@ export default function Registration() {
         let errorMessage = "Registration failed";
         
         if (error && typeof error === "object" && "response" in error) {
-          const axiosError = error as { response?: { data?: { message?: string; errors?: Record<string, unknown> } } };
-          if (axiosError.response?.data?.message) {
-            errorMessage = axiosError.response.data.message;
-          } else if (axiosError.response?.data?.errors) {
+          const axiosError = error as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } };
+          if (axiosError.response?.data?.errors) {
             const errors = axiosError.response.data.errors;
-            const firstError = Object.values(errors)[0];
-            errorMessage = Array.isArray(firstError) ? firstError[0] : firstError;
+            const errorMessages = Object.entries(errors)
+              .map(([field, messages]) => {
+                const fieldName = field.replace(/\./g, ' ').replace(/([A-Z])/g, ' $1').toLowerCase();
+                return `${fieldName}: ${Array.isArray(messages) ? messages[0] : messages}`;
+              })
+              .join('\n');
+            errorMessage = errorMessages;
+          } else if (axiosError.response?.data?.message) {
+            errorMessage = axiosError.response.data.message;
           }
         } else if (error instanceof Error) {
           errorMessage = error.message;
