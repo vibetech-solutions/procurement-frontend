@@ -738,12 +738,14 @@ export default function ProfilePage() {
                     <Select
                       label="Items per page"
                       value={userSettings.items_per_page}
-                      onChange={(value) =>
-                        setUserSettings((prev) => ({
-                          ...prev,
-                          items_per_page: value || "10",
-                        }))
-                      }
+                      onChange={(value) => {
+                        if (value) {
+                          setUserSettings((prev) => ({
+                            ...prev,
+                            items_per_page: value,
+                          }));
+                        }
+                      }}
                       data={[
                         { value: "10", label: "10 items" },
                         { value: "25", label: "25 items" },
