@@ -126,26 +126,34 @@ export default function ProfilePage() {
     if (user) {
       try {
         setEditUser({ ...user });
-        setUserSettings({
-          language: user.settings?.language || "",
-          timezone: user.settings?.timezone || "",
-          currency: user.settings?.currency || "",
-          date_format: user.settings?.date_format || "",
-          show_dashboard_statistics:
-            user.settings?.show_dashboard_statistics || false,
-          show_recent_activity: user.settings?.show_recent_activity || false,
-          show_pending_approvals:
-            user.settings?.show_pending_approvals || false,
-          auto_refresh_data: user.settings?.auto_refresh_data || false,
-          items_per_page: user.settings?.items_per_page?.toString() || "10",
-          email_notifications: user.settings?.email_notifications || true,
-          sms_notifications: user.settings?.sms_notifications || false,
-          requisition_status_updates:
-            user.settings?.requisition_status_updates || true,
-          approval_reminders: user.settings?.approval_reminders || true,
-          system_alerts: user.settings?.system_alerts || false,
-          two_factor_auth: user.settings?.two_factor_auth || false,
-          login_notifications: user.settings?.login_notifications || false,
+        setUserSettings(prev => {
+          const newSettings = {
+            language: user.settings?.language || "",
+            timezone: user.settings?.timezone || "",
+            currency: user.settings?.currency || "",
+            date_format: user.settings?.date_format || "",
+            show_dashboard_statistics:
+              user.settings?.show_dashboard_statistics || false,
+            show_recent_activity: user.settings?.show_recent_activity || false,
+            show_pending_approvals:
+              user.settings?.show_pending_approvals || false,
+            auto_refresh_data: user.settings?.auto_refresh_data || false,
+            items_per_page: user.settings?.items_per_page?.toString() || "10",
+            email_notifications: user.settings?.email_notifications || true,
+            sms_notifications: user.settings?.sms_notifications || false,
+            requisition_status_updates:
+              user.settings?.requisition_status_updates || true,
+            approval_reminders: user.settings?.approval_reminders || true,
+            system_alerts: user.settings?.system_alerts || false,
+            two_factor_auth: user.settings?.two_factor_auth || false,
+            login_notifications: user.settings?.login_notifications || false,
+          };
+          
+          // Only update if different to prevent infinite loops
+          if (JSON.stringify(prev) !== JSON.stringify(newSettings)) {
+            return newSettings;
+          }
+          return prev;
         });
       } catch (error) {
         console.error("Failed to update editUser:", error);
@@ -735,22 +743,19 @@ export default function ProfilePage() {
                         }));
                       }}
                     />
-                    <Select
+                    <TextInput
                       label="Items per page"
+                      type="number"
+                      min={1}
+                      max={100}
                       value={userSettings.items_per_page}
-                      onChange={(value) => {
-                        if (value) {
-                          setUserSettings((prev) => ({
-                            ...prev,
-                            items_per_page: value,
-                          }));
-                        }
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setUserSettings((prev) => ({
+                          ...prev,
+                          items_per_page: value,
+                        }));
                       }}
-                      data={[
-                        { value: "10", label: "10 items" },
-                        { value: "25", label: "25 items" },
-                        { value: "50", label: "50 items" },
-                      ]}
                     />
                   </Stack>
                   <Group justify="flex-end" mt="md">
