@@ -737,7 +737,7 @@ export default function SupplierProfilePage() {
                             if (userData?.certificate_of_registration) {
                               setDocumentModal({
                                 open: true,
-                                url: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/documents/${userData.certificate_of_registration}`,
+                                url: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/documents/${userData.certificate_of_registration}`,
                                 title: "Certificate of Registration",
                               });
                             }
