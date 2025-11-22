@@ -94,7 +94,7 @@ export const dashboardRecentActivity = [
 ];
 
 export const navItems = [
-  { label: "Dashboard", icon: IconHome, href: "/dashboard" },
+  { label: "Dashboard", icon: IconHome, href: "/application/dashboard" },
   {
     label: "User Management",
     icon: IconUsers,
