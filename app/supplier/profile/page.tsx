@@ -740,7 +740,7 @@ export default function SupplierProfilePage() {
                             if (userData?.certificate_of_registration) {
                               setDocumentModal({
                                 open: true,
-                                url: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/documents/${userData.certificate_of_registration.split('/').pop()}`,
+                                url: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/documents/${userData.certificate_of_registration}`,
                                 title: "Certificate of Registration",
                               });
                             }
@@ -795,7 +795,7 @@ export default function SupplierProfilePage() {
                             if (userData?.code_of_conduct) {
                               setDocumentModal({
                                 open: true,
-                                url: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/documents/${userData.code_of_conduct.split('/').pop()}`,
+                                url: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/documents/${userData.code_of_conduct}`,
                                 title: "Code of Conduct",
                               });
                             }
@@ -852,7 +852,7 @@ export default function SupplierProfilePage() {
                             if (userData?.vendor_verification_form) {
                               setDocumentModal({
                                 open: true,
-                                url: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/documents/${userData.vendor_verification_form.split('/').pop()}`,
+                                url: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/documents/${userData.vendor_verification_form}`,
                                 title: "Vendor Verification Form",
                               });
                             }
@@ -909,7 +909,7 @@ export default function SupplierProfilePage() {
                             if (userData?.organisation_structure) {
                               setDocumentModal({
                                 open: true,
-                                url: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/documents/${userData.organisation_structure.split('/').pop()}`,
+                                url: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/documents/${userData.organisation_structure}`,
                                 title: "Organisation Structure",
                               });
                             }
@@ -968,7 +968,7 @@ export default function SupplierProfilePage() {
                             if (userData?.bank_letter) {
                               setDocumentModal({
                                 open: true,
-                                url: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/documents/${userData.bank_letter.split('/').pop()}`,
+                                url: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/documents/${userData.bank_letter}`,
                                 title: "Bank Letter",
                               });
                             }
@@ -1025,7 +1025,7 @@ export default function SupplierProfilePage() {
                             if (userData?.commercial_assessment_form) {
                               setDocumentModal({
                                 open: true,
-                                url: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/documents/${userData.commercial_assessment_form.split('/').pop()}`,
+                                url: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/documents/${userData.commercial_assessment_form}`,
                                 title: "Commercial Assessment Form",
                               });
                             }
@@ -1080,7 +1080,7 @@ export default function SupplierProfilePage() {
                             if (userData?.vat_certificate) {
                               setDocumentModal({
                                 open: true,
-                                url: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/documents/${userData.vat_certificate.split('/').pop()}`,
+                                url: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/documents/${userData.vat_certificate}`,
                                 title: "VAT Certificate",
                               });
                             }
@@ -1135,7 +1135,7 @@ export default function SupplierProfilePage() {
                             if (userData?.annual_returns) {
                               setDocumentModal({
                                 open: true,
-                                url: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/documents/${userData.annual_returns.split('/').pop()}`,
+                                url: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/documents/${userData.annual_returns}`,
                                 title: "Annual Returns",
                               });
                             }
