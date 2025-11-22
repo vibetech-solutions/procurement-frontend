@@ -1,0 +1,56 @@
+import { Role } from "./role";
+
+export type User = {
+  id: number;
+  first_name: string;
+  last_name: string;
+  company_name: string;
+  email: string;
+  roles: Role[];
+  phone: string;
+  created_at: string;
+  user_name: string;
+  user_code: string;
+  address: string;
+  avatar: string;
+  company_website: string;
+  kra_pin: string;
+  company_registration_no: string;
+  company_registration_year: string;
+  payment_terms: string;
+  supplier_trading_name: string;
+  settings: Settings;
+  bank_name: string;
+  bank_account_number: string;
+  swift_code: string;
+  certificate_of_registration: string;
+  bank_letter: string;
+  code_of_conduct: string;
+  vendor_verification_form: string;
+  commercial_assessment_form: string;
+  vat_certificate: string;
+  annual_returns: string;
+  organisation_structure: string;
+};
+
+type Settings = {
+  language: string;
+  date_format: string;
+  currency: string;
+  timezone: string;
+  show_dashboard_statistics: boolean;
+  show_recent_activity: boolean;
+  show_pending_approvals: boolean;
+  auto_refresh_data: boolean;
+  items_per_page: number;
+  email_notifications: boolean;
+  sms_notifications: boolean;
+  requisition_status_updates: boolean;
+  approval_reminders: boolean;
+  system_alerts: boolean;
+  two_factor_auth: boolean;
+  login_notifications: boolean;
+  new_rfq_notifications: boolean;
+  order_updates: boolean;
+  payment_notifications: boolean;
+};
