@@ -3,21 +3,28 @@
 import { NavLink } from "@mantine/core";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { navItems } from "@/lib/utils/constants";
+import { navItems, supplierNavItems } from "@/lib/utils/constants";
+import { useAppSelector } from "@/lib/redux/hooks";
 
 export function Navigation() {
   const pathname = usePathname();
+  const { user } = useAppSelector((state) => state.auth);
+  
+  // Determine if user is a supplier
+  const isSupplier = user?.roles?.[0]?.name === "SUPPLIER";
+  const currentNavItems = isSupplier ? supplierNavItems : navItems;
+  const baseHref = isSupplier ? "" : "/application";
 
   return (
     <>
-      {navItems.map((item) => {
+      {currentNavItems.map((item) => {
         if (item.children) {
           return (
             <NavLink
               key={item.href}
               label={item.label}
               leftSection={<item.icon size={20} stroke={1.5} />}
-              active={item.children.some(child => pathname === `/application${child.href}`)}
+              active={item.children.some(child => pathname === `${baseHref}${child.href}`)}
               variant="filled"
               mb={4}
             >
@@ -25,9 +32,9 @@ export function Navigation() {
                 <NavLink
                   key={child.href}
                   component={Link}
-                  href={`/application${child.href}`}
+                  href={`${baseHref}${child.href}`}
                   label={child.label}
-                  active={pathname === `/application${child.href}`}
+                  active={pathname === `${baseHref}${child.href}`}
                   variant="filled"
                 />
               ))}
@@ -39,10 +46,10 @@ export function Navigation() {
           <NavLink
             key={item.href}
             component={Link}
-            href={`/application${item.href}`}
+            href={item.href}
             label={item.label}
             leftSection={<item.icon size={20} stroke={1.5} />}
-            active={pathname === `/application${item.href}`}
+            active={pathname === item.href}
             variant="filled"
             mb={4}
           />
