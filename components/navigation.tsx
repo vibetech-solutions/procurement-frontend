@@ -18,7 +18,7 @@ export function Navigation() {
   return (
     <>
       {currentNavItems.map((item) => {
-        if (item.children) {
+        if ('children' in item && item.children && Array.isArray(item.children)) {
           return (
             <NavLink
               key={item.href}
