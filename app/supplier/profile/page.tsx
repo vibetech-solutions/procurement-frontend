@@ -19,7 +19,6 @@ import {
   Divider,
   ActionIcon,
   Tabs,
-
   Switch,
 } from "@mantine/core";
 import { DocumentViewerModal } from "@/components/shared/document-viewer-modal";
@@ -148,8 +147,6 @@ export default function SupplierProfilePage() {
       });
     }
   };
-
-  console.log("YUSAA DATA", userData);
 
   return (
     <ContentContainer>
@@ -712,13 +709,13 @@ export default function SupplierProfilePage() {
               <Text size="sm" c="dimmed" mb="md">
                 Manage your company documents
               </Text>
-              
+
               <Tabs defaultValue="legal">
                 <Tabs.List>
                   <Tabs.Tab value="legal">Legal Documents</Tabs.Tab>
                   <Tabs.Tab value="financial">Financial Documents</Tabs.Tab>
                 </Tabs.List>
-                
+
                 <Tabs.Panel value="legal" pt="md">
                   <Stack gap="md">
                     {editingDocument === "certificate_of_registration" ? (
@@ -770,9 +767,13 @@ export default function SupplierProfilePage() {
                           <Button
                             size="xs"
                             variant="outline"
-                            onClick={() => setEditingDocument("certificate_of_registration")}
+                            onClick={() =>
+                              setEditingDocument("certificate_of_registration")
+                            }
                           >
-                            {userData?.certificate_of_registration ? "Replace" : "Upload"}
+                            {userData?.certificate_of_registration
+                              ? "Replace"
+                              : "Upload"}
                           </Button>
                         </Group>
                       </Group>
@@ -788,7 +789,9 @@ export default function SupplierProfilePage() {
                       <Group justify="space-between">
                         <Group
                           style={{
-                            cursor: userData?.code_of_conduct ? "pointer" : "default",
+                            cursor: userData?.code_of_conduct
+                              ? "pointer"
+                              : "default",
                             flex: 1,
                           }}
                           onClick={() => {
@@ -825,7 +828,9 @@ export default function SupplierProfilePage() {
                           <Button
                             size="xs"
                             variant="outline"
-                            onClick={() => setEditingDocument("code_of_conduct")}
+                            onClick={() =>
+                              setEditingDocument("code_of_conduct")
+                            }
                           >
                             {userData?.code_of_conduct ? "Replace" : "Upload"}
                           </Button>
@@ -882,9 +887,13 @@ export default function SupplierProfilePage() {
                           <Button
                             size="xs"
                             variant="outline"
-                            onClick={() => setEditingDocument("vendor_verification_form")}
+                            onClick={() =>
+                              setEditingDocument("vendor_verification_form")
+                            }
                           >
-                            {userData?.vendor_verification_form ? "Replace" : "Upload"}
+                            {userData?.vendor_verification_form
+                              ? "Replace"
+                              : "Upload"}
                           </Button>
                         </Group>
                       </Group>
@@ -939,16 +948,20 @@ export default function SupplierProfilePage() {
                           <Button
                             size="xs"
                             variant="outline"
-                            onClick={() => setEditingDocument("organisation_structure")}
+                            onClick={() =>
+                              setEditingDocument("organisation_structure")
+                            }
                           >
-                            {userData?.organisation_structure ? "Replace" : "Upload"}
+                            {userData?.organisation_structure
+                              ? "Replace"
+                              : "Upload"}
                           </Button>
                         </Group>
                       </Group>
                     )}
                   </Stack>
                 </Tabs.Panel>
-                
+
                 <Tabs.Panel value="financial" pt="md">
                   <Stack gap="md">
                     {editingDocument === "bank_letter" ? (
@@ -961,7 +974,9 @@ export default function SupplierProfilePage() {
                       <Group justify="space-between">
                         <Group
                           style={{
-                            cursor: userData?.bank_letter ? "pointer" : "default",
+                            cursor: userData?.bank_letter
+                              ? "pointer"
+                              : "default",
                             flex: 1,
                           }}
                           onClick={() => {
@@ -1055,9 +1070,13 @@ export default function SupplierProfilePage() {
                           <Button
                             size="xs"
                             variant="outline"
-                            onClick={() => setEditingDocument("commercial_assessment_form")}
+                            onClick={() =>
+                              setEditingDocument("commercial_assessment_form")
+                            }
                           >
-                            {userData?.commercial_assessment_form ? "Replace" : "Upload"}
+                            {userData?.commercial_assessment_form
+                              ? "Replace"
+                              : "Upload"}
                           </Button>
                         </Group>
                       </Group>
@@ -1073,7 +1092,9 @@ export default function SupplierProfilePage() {
                       <Group justify="space-between">
                         <Group
                           style={{
-                            cursor: userData?.vat_certificate ? "pointer" : "default",
+                            cursor: userData?.vat_certificate
+                              ? "pointer"
+                              : "default",
                             flex: 1,
                           }}
                           onClick={() => {
@@ -1110,7 +1131,9 @@ export default function SupplierProfilePage() {
                           <Button
                             size="xs"
                             variant="outline"
-                            onClick={() => setEditingDocument("vat_certificate")}
+                            onClick={() =>
+                              setEditingDocument("vat_certificate")
+                            }
                           >
                             {userData?.vat_certificate ? "Replace" : "Upload"}
                           </Button>
@@ -1128,7 +1151,9 @@ export default function SupplierProfilePage() {
                       <Group justify="space-between">
                         <Group
                           style={{
-                            cursor: userData?.annual_returns ? "pointer" : "default",
+                            cursor: userData?.annual_returns
+                              ? "pointer"
+                              : "default",
                             flex: 1,
                           }}
                           onClick={() => {
@@ -1175,7 +1200,7 @@ export default function SupplierProfilePage() {
                   </Stack>
                 </Tabs.Panel>
               </Tabs>
-                        
+
               {editModes.documents && (
                 <Group justify="flex-end" mt="md">
                   <Button
