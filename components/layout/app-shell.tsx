@@ -105,10 +105,10 @@ export function AppShellLayout({ children }: AppShellLayoutProps) {
               hiddenFrom="sm"
               size="sm"
             />
-            <Text size="xl" fw={700}>
+            <Text size="xl" fw={700} visibleFrom="xs">
               ProcurementHub
             </Text>
-            <Text size="sm" c="dimmed">
+            <Text size="sm" c="dimmed" visibleFrom="sm">
               Enterprise
             </Text>
           </Group>
@@ -118,10 +118,10 @@ export function AppShellLayout({ children }: AppShellLayoutProps) {
 
             {user && (
               <>
-                <UnstyledButton component={Link} href="/application/help">
+                <UnstyledButton component={Link} href="/application/help" visibleFrom="md">
                   <IconHelp size={20} stroke={1.5} />
                 </UnstyledButton>
-                <UnstyledButton component={Link} href="/application/wishlist">
+                <UnstyledButton component={Link} href="/application/wishlist" visibleFrom="md">
                   <IconHeart size={20} stroke={1.5} />
                 </UnstyledButton>
 

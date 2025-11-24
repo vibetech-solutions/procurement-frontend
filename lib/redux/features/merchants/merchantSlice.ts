@@ -1,12 +1,19 @@
 import clientaxiosinstance from "@/lib/services/clientaxiosinstance";
+import { Role } from "@/types/role";
 
 import { User } from "@/types/user";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 interface MerchantState {
   users: User[];
+  roles: Role[];
+  role: Role;
   usersLoading: boolean;
+  rolesLoading: boolean;
+  roleLoading: boolean;
   usersError: string | null;
+  rolesError: string | null;
+  roleError: string | null;
   user: User;
   userLoading: boolean;
   userError: string | null;
@@ -14,8 +21,14 @@ interface MerchantState {
 
 const state: MerchantState = {
   users: [],
+  roles: [],
+  role: {} as Role,
+  roleLoading: false,
+  roleError: null,
   usersLoading: false,
+  rolesLoading: false,
   usersError: null,
+  rolesError: null,
   user: {} as User,
   userLoading: false,
   userError: null,
@@ -52,6 +65,19 @@ export const merchantSlice = createSlice({
       .addCase(fetchUser.rejected, (state, action) => {
         state.userLoading = false;
         state.userError = action.error.message ?? "An error occurred";
+      })
+      .addCase(fetchRole.pending, (state) => {
+        state.roleLoading = true;
+        state.roleError = null;
+      })
+      .addCase(fetchRole.fulfilled, (state, action) => {
+        state.roleLoading = false;
+        state.role = action.payload;
+        state.roleError = null;
+      })
+      .addCase(fetchRole.rejected, (state, action) => {
+        state.roleLoading = false;
+        state.roleError = action.error.message ?? "An error occurred";
       })
       .addCase(addUser.pending, (state) => {
         state.userLoading = true;
@@ -91,6 +117,19 @@ export const merchantSlice = createSlice({
       .addCase(deleteUser.rejected, (state, action) => {
         state.userLoading = false;
         state.userError = action.error.message ?? "An error occurred";
+      })
+      .addCase(fetchRoles.pending, (state) => {
+        state.rolesLoading = true;
+        state.rolesError = null;
+      })
+      .addCase(fetchRoles.fulfilled, (state, action) => {
+        state.rolesLoading = false;
+        state.roles = action.payload;
+        state.rolesError = null;
+      })
+      .addCase(fetchRoles.rejected, (state, action) => {
+        state.rolesLoading = false;
+        state.rolesError = action.error.message ?? "An error occurred";
       });
   },
 });
@@ -98,8 +137,13 @@ export const merchantSlice = createSlice({
 export const fetchUsers = createAsyncThunk("merchants/fetchUsers", async () => {
   await clientaxiosinstance.get("/sanctum/csrf-cookie");
   const response = await clientaxiosinstance.get("/merchants/users");
-
   return response.data as User[];
+});
+
+export const fetchRoles = createAsyncThunk("merchants/fetchRoles", async () => {
+  await clientaxiosinstance.get("/sanctum/csrf-cookie");
+  const response = await clientaxiosinstance.get("/merchants/roles");
+  return response.data as Role[];
 });
 
 export const fetchUser = createAsyncThunk(
@@ -108,6 +152,15 @@ export const fetchUser = createAsyncThunk(
     await clientaxiosinstance.get("/sanctum/csrf-cookie");
     const response = await clientaxiosinstance.get(`/merchants/users/${id}`);
     return response.data as User;
+  }
+);
+
+export const fetchRole = createAsyncThunk(
+  "merchants/fetchRole",
+  async (id: number) => {
+    await clientaxiosinstance.get("/sanctum/csrf-cookie");
+    const response = await clientaxiosinstance.get(`/merchants/roles/${id}`);
+    return response.data as Role;
   }
 );
 

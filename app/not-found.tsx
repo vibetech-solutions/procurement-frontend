@@ -1,14 +1,23 @@
-"use client"
+"use client";
 
-import { Container, Title, Text, Button, Stack, Box } from "@mantine/core"
-import { IconHome, IconArrowLeft } from "@tabler/icons-react"
-import Link from "next/link"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { Container, Title, Text, Button, Stack, Box } from "@mantine/core";
+import { IconHome, IconArrowLeft } from "@tabler/icons-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function NotFound() {
+  const router = useRouter();
+
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'light-dark(var(--mantine-color-white), var(--mantine-color-dark-7))' }}>
-      <Box style={{ position: 'absolute', top: 20, right: 20 }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        backgroundColor:
+          "light-dark(var(--mantine-color-white), var(--mantine-color-dark-7))",
+      }}
+    >
+      <Box style={{ position: "absolute", top: 20, right: 20 }}>
         <ThemeToggle />
       </Box>
       <Container size="sm" py={80}>
@@ -21,20 +30,30 @@ export default function NotFound() {
               Page Not Found
             </Title>
             <Text size="lg" c="dimmed" mt="md">
-              The page you&apos;re looking for doesn&apos;t exist or has been moved.
+              The page you&apos;re looking for doesn&apos;t exist or has been
+              moved.
             </Text>
           </div>
-          
+
           <Stack gap="md">
-            <Button component={Link} href="/" leftSection={<IconHome size={16} />} size="lg">
+            <Button
+              component={Link}
+              href="/"
+              leftSection={<IconHome size={16} />}
+              size="lg"
+            >
               Go Home
             </Button>
-            <Button component={Link} href="javascript:history.back()" variant="outline" leftSection={<IconArrowLeft size={16} />}>
+            <Button
+              onClick={() => router.back()}
+              variant="outline"
+              leftSection={<IconArrowLeft size={16} />}
+            >
               Go Back
             </Button>
           </Stack>
         </Stack>
       </Container>
     </div>
-  )
+  );
 }

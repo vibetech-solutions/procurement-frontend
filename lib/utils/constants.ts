@@ -122,8 +122,8 @@ export const navItems = [
       { label: "Request Cart", href: "/cart" },
     ],
   },
-  { label: "Projects", icon: IconFolders, href: "/projects" },
-  { label: "Inventory", icon: IconPackage, href: "/inventory" },
+  { label: "Projects", icon: IconFolders, href: "/application/projects" },
+  { label: "Inventory", icon: IconPackage, href: "/application/inventory" },
   {
     label: "Procurement",
     icon: IconClipboardList,

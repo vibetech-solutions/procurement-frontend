@@ -23,6 +23,7 @@ import {
   Table,
   Tabs,
   Menu,
+  Modal,
 } from "@mantine/core";
 import {
   IconSearch,
@@ -37,16 +38,80 @@ import {
   IconPackage,
   IconChevronDown,
   IconEdit,
+  IconBulb,
+  IconCheck,
+  IconX,
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { useState } from "react";
 
+// Mock recommended items data
+const recommendedProducts = [
+  {
+    id: "REC-001",
+    name: "Wireless Presentation Remote",
+    description: "Bluetooth presentation remote with laser pointer for conference rooms",
+    category: "Electronics",
+    estimatedPrice: "KES 3,500",
+    requestedBy: "John Doe",
+    requestDate: "2024-01-15",
+    reason: "Needed for client presentations in meeting rooms",
+    status: "pending",
+    type: "product"
+  },
+  {
+    id: "REC-002", 
+    name: "Ergonomic Standing Desk Converter",
+    description: "Adjustable standing desk converter for health and productivity",
+    category: "Office Furniture",
+    estimatedPrice: "KES 25,000",
+    requestedBy: "Jane Smith",
+    requestDate: "2024-01-14",
+    reason: "To improve employee wellness and reduce back strain",
+    status: "pending",
+    type: "product"
+  }
+];
+
+const recommendedServices = [
+  {
+    id: "REC-003",
+    name: "Cloud Storage Backup Service",
+    description: "Monthly cloud backup service for critical business data",
+    category: "IT Services",
+    estimatedPrice: "KES 8,000/month",
+    requestedBy: "Mike Johnson",
+    requestDate: "2024-01-13",
+    reason: "Need reliable backup solution for data security compliance",
+    status: "pending",
+    type: "service"
+  }
+];
+
 export default function InternalCatalogPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [activeTab, setActiveTab] = useState<string | null>('inventory');
+  const [recommendationTab, setRecommendationTab] = useState<string | null>('products');
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedRecommendation, setSelectedRecommendation] = useState<typeof recommendedProducts[0] | null>(null);
   
   const currentItems = activeTab === 'inventory' ? catalogueItems : nonTangibleCatalogueItems;
   const currentCategories = activeTab === 'inventory' ? catalogueCategories : nonTangibleCategories;
+
+  const handleApproveRecommendation = (id: string) => {
+    console.log('Approving recommendation:', id);
+  };
+
+  const handleRejectRecommendation = (id: string) => {
+    console.log('Rejecting recommendation:', id);
+  };
+
+  const handleViewRecommendation = (id: string) => {
+    const allRecommendations = [...recommendedProducts, ...recommendedServices];
+    const item = allRecommendations.find(rec => rec.id === id);
+    setSelectedRecommendation(item || null);
+    setViewModalOpen(true);
+  };
 
   return (
     <ContentContainer>
@@ -92,6 +157,9 @@ export default function InternalCatalogPage() {
             </Tabs.Tab>
             <Tabs.Tab value="services" leftSection={<IconPlane size={16} />}>
               Services ({nonTangibleCatalogueItems.length})
+            </Tabs.Tab>
+            <Tabs.Tab value="recommendations" leftSection={<IconBulb size={16} />}>
+              Recommended Items ({recommendedProducts.length + recommendedServices.length})
             </Tabs.Tab>
           </Tabs.List>
 
@@ -162,8 +230,168 @@ export default function InternalCatalogPage() {
               </Grid>
             </Paper>
           </Tabs.Panel>
+
+          <Tabs.Panel value="recommendations" pt="md">
+            <Tabs value={recommendationTab} onChange={setRecommendationTab}>
+              <Tabs.List>
+                <Tabs.Tab value="products" leftSection={<IconPackage size={16} />}>
+                  Products ({recommendedProducts.length})
+                </Tabs.Tab>
+                <Tabs.Tab value="services" leftSection={<IconPlane size={16} />}>
+                  Services ({recommendedServices.length})
+                </Tabs.Tab>
+              </Tabs.List>
+
+              <Tabs.Panel value="products" pt="md">
+                <Paper p="md" withBorder>
+                  <Text size="sm" c="dimmed" mb="md">
+                    Review product recommendations from users. Approve to add to catalog or reject with feedback.
+                  </Text>
+                  <Table highlightOnHover>
+                    <Table.Thead>
+                      <Table.Tr>
+                        <Table.Th>Item Details</Table.Th>
+                        <Table.Th>Requested By</Table.Th>
+                        <Table.Th>Reason</Table.Th>
+                        <Table.Th>Est. Price</Table.Th>
+                        <Table.Th>Actions</Table.Th>
+                      </Table.Tr>
+                    </Table.Thead>
+                    <Table.Tbody>
+                      {recommendedProducts.map((item) => (
+                        <Table.Tr key={item.id}>
+                          <Table.Td>
+                            <div>
+                              <Text fw={500} size="sm">{item.name}</Text>
+                              <Text size="xs" c="dimmed">{item.id}</Text>
+                              <Text size="xs" c="dimmed" lineClamp={2}>{item.description}</Text>
+                              <Badge variant="light" size="xs" mt={4}>{item.category}</Badge>
+                            </div>
+                          </Table.Td>
+                          <Table.Td>
+                            <div>
+                              <Text size="sm">{item.requestedBy}</Text>
+                              <Text size="xs" c="dimmed">{item.requestDate}</Text>
+                            </div>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="sm" lineClamp={3}>{item.reason}</Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="sm" fw={600} c="cyan">{item.estimatedPrice}</Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Group gap="xs">
+                              <ActionIcon
+                                variant="subtle"
+                                color="blue"
+                                size="sm"
+                                onClick={() => handleViewRecommendation(item.id)}
+                              >
+                                <IconEye size={14} />
+                              </ActionIcon>
+                              <ActionIcon
+                                variant="filled"
+                                color="green"
+                                size="sm"
+                                onClick={() => handleApproveRecommendation(item.id)}
+                              >
+                                <IconCheck size={14} />
+                              </ActionIcon>
+                              <ActionIcon
+                                variant="filled"
+                                color="red"
+                                size="sm"
+                                onClick={() => handleRejectRecommendation(item.id)}
+                              >
+                                <IconX size={14} />
+                              </ActionIcon>
+                            </Group>
+                          </Table.Td>
+                        </Table.Tr>
+                      ))}
+                    </Table.Tbody>
+                  </Table>
+                </Paper>
+              </Tabs.Panel>
+
+              <Tabs.Panel value="services" pt="md">
+                <Paper p="md" withBorder>
+                  <Text size="sm" c="dimmed" mb="md">
+                    Review service recommendations from users. Approve to add to catalog or reject with feedback.
+                  </Text>
+                  <Table highlightOnHover>
+                    <Table.Thead>
+                      <Table.Tr>
+                        <Table.Th>Service Details</Table.Th>
+                        <Table.Th>Requested By</Table.Th>
+                        <Table.Th>Reason</Table.Th>
+                        <Table.Th>Est. Price</Table.Th>
+                        <Table.Th>Actions</Table.Th>
+                      </Table.Tr>
+                    </Table.Thead>
+                    <Table.Tbody>
+                      {recommendedServices.map((item) => (
+                        <Table.Tr key={item.id}>
+                          <Table.Td>
+                            <div>
+                              <Text fw={500} size="sm">{item.name}</Text>
+                              <Text size="xs" c="dimmed">{item.id}</Text>
+                              <Text size="xs" c="dimmed" lineClamp={2}>{item.description}</Text>
+                              <Badge variant="light" size="xs" mt={4}>{item.category}</Badge>
+                            </div>
+                          </Table.Td>
+                          <Table.Td>
+                            <div>
+                              <Text size="sm">{item.requestedBy}</Text>
+                              <Text size="xs" c="dimmed">{item.requestDate}</Text>
+                            </div>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="sm" lineClamp={3}>{item.reason}</Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="sm" fw={600} c="cyan">{item.estimatedPrice}</Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Group gap="xs">
+                              <ActionIcon
+                                variant="subtle"
+                                color="blue"
+                                size="sm"
+                                onClick={() => handleViewRecommendation(item.id)}
+                              >
+                                <IconEye size={14} />
+                              </ActionIcon>
+                              <ActionIcon
+                                variant="filled"
+                                color="green"
+                                size="sm"
+                                onClick={() => handleApproveRecommendation(item.id)}
+                              >
+                                <IconCheck size={14} />
+                              </ActionIcon>
+                              <ActionIcon
+                                variant="filled"
+                                color="red"
+                                size="sm"
+                                onClick={() => handleRejectRecommendation(item.id)}
+                              >
+                                <IconX size={14} />
+                              </ActionIcon>
+                            </Group>
+                          </Table.Td>
+                        </Table.Tr>
+                      ))}
+                    </Table.Tbody>
+                  </Table>
+                </Paper>
+              </Tabs.Panel>
+            </Tabs>
+          </Tabs.Panel>
         </Tabs>
 
+        {activeTab !== 'recommendations' && (
         <Grid gutter="lg">
           <Grid.Col span={{ base: 12, md: 3 }}>
             <Card shadow="sm" padding="lg" radius="md" withBorder h="100%">
@@ -416,6 +644,81 @@ export default function InternalCatalogPage() {
             </Stack>
           </Grid.Col>
         </Grid>
+        )}
+
+        {/* View Recommendation Modal */}
+        <Modal
+          opened={viewModalOpen}
+          onClose={() => setViewModalOpen(false)}
+          title="Item Recommendation Details"
+          size="lg"
+          centered
+        >
+          {selectedRecommendation && (
+            <Stack gap="md">
+              <Group justify="space-between">
+                <div>
+                  <Text fw={600} size="lg">{selectedRecommendation.name}</Text>
+                  <Text size="sm" c="dimmed">{selectedRecommendation.id}</Text>
+                </div>
+                <Badge variant="light">{selectedRecommendation.category}</Badge>
+              </Group>
+              
+              <Paper p="md" withBorder>
+                <Text fw={500} mb="xs">Description</Text>
+                <Text size="sm">{selectedRecommendation.description}</Text>
+              </Paper>
+              
+              <Grid>
+                <Grid.Col span={6}>
+                  <Paper p="md" withBorder>
+                    <Text fw={500} mb="xs">Requested By</Text>
+                    <Text size="sm">{selectedRecommendation.requestedBy}</Text>
+                    <Text size="xs" c="dimmed">{selectedRecommendation.requestDate}</Text>
+                  </Paper>
+                </Grid.Col>
+                <Grid.Col span={6}>
+                  <Paper p="md" withBorder>
+                    <Text fw={500} mb="xs">Estimated Price</Text>
+                    <Text size="lg" fw={600} c="cyan">{selectedRecommendation.estimatedPrice}</Text>
+                  </Paper>
+                </Grid.Col>
+              </Grid>
+              
+              <Paper p="md" withBorder>
+                <Text fw={500} mb="xs">Specifications</Text>
+                <Text size="sm">{selectedRecommendation.reason}</Text>
+              </Paper>
+              
+              <Group justify="flex-end" gap="sm">
+                <Button
+                  variant="outline"
+                  onClick={() => setViewModalOpen(false)}
+                >
+                  Close
+                </Button>
+                <Button
+                  color="red"
+                  onClick={() => {
+                    handleRejectRecommendation(selectedRecommendation.id);
+                    setViewModalOpen(false);
+                  }}
+                >
+                  Reject
+                </Button>
+                <Button
+                  color="green"
+                  onClick={() => {
+                    handleApproveRecommendation(selectedRecommendation.id);
+                    setViewModalOpen(false);
+                  }}
+                >
+                  Approve & Add to Catalog
+                </Button>
+              </Group>
+            </Stack>
+          )}
+        </Modal>
       </Stack>
     </ContentContainer>
   );

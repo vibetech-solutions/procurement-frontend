@@ -1,158 +1,142 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Container,
   Title,
-  Paper,
   Table,
-  Badge,
   Button,
   Group,
   ActionIcon,
   Text,
   TextInput,
-  Select,
+  LoadingOverlay,
+  Stack,
+  Card,
+  Flex,
 } from "@mantine/core";
-import { IconPlus, IconEdit, IconTrash, IconSearch } from "@tabler/icons-react";
+import {
+  IconPlus,
+  IconSearch,
+  IconEye,
+} from "@tabler/icons-react";
 import Link from "next/link";
-
-const roles = [
-  {
-    id: "ROLE-001",
-    name: "Administrator",
-    description: "Full system access and management",
-    userCount: 3,
-    permissions: ["All Permissions"],
-    status: "Active",
-  },
-  {
-    id: "ROLE-002", 
-    name: "Procurement Manager",
-    description: "Manage procurement processes and approvals",
-    userCount: 5,
-    permissions: ["Approve Requisitions", "Manage Suppliers", "Create Purchase Orders"],
-    status: "Active",
-  },
-  {
-    id: "ROLE-003",
-    name: "Requester",
-    description: "Create and submit requisitions",
-    userCount: 25,
-    permissions: ["Create Requisitions", "View Catalogue", "Track Orders"],
-    status: "Active",
-  },
-  {
-    id: "ROLE-004",
-    name: "Finance Officer",
-    description: "Financial oversight and budget management",
-    userCount: 2,
-    permissions: ["View Reports", "Manage Budgets", "Approve Payments"],
-    status: "Active",
-  },
-];
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import { fetchRoles } from "@/lib/redux/features/merchants/merchantSlice";
 
 export default function RolesPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+
+  const { roles, rolesLoading } = useAppSelector((state) => state.merchants);
+
+  useEffect(() => {
+    dispatch(fetchRoles());
+  }, [dispatch]);
 
   const filteredRoles = roles.filter((role) => {
-    const matchesSearch = role.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         role.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = !statusFilter || role.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesSearch = role.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    return matchesSearch;
   });
 
+  if (rolesLoading) {
+    return (
+      <Container size="xl" style={{ position: "relative", minHeight: "200px" }}>
+        <LoadingOverlay visible />
+      </Container>
+    );
+  }
+
   return (
-    <Container size="xl">
-      <Group justify="space-between" mb="xl">
-        <Title order={2}>Roles Management</Title>
-        <Button
-          component={Link}
-          href="/application/roles/new"
-          leftSection={<IconPlus size={16} />}
-        >
-          Add Role
-        </Button>
-      </Group>
+    <Container size="xl" py="md">
+      <Stack gap="lg">
+        {/* Header */}
+        <Flex justify="space-between" align="center" wrap="wrap" gap="md">
+          <div>
+            <Title order={2} mb={4}>
+              Roles Management
+            </Title>
+            <Text c="dimmed" size="sm">
+              Manage user roles and permissions for your organization
+            </Text>
+          </div>
+          <Button
+            component={Link}
+            href="/application/roles/new"
+            leftSection={<IconPlus size={16} />}
+            size="sm"
+          >
+            Add Role
+          </Button>
+        </Flex>
 
-      <Paper p="md" mb="lg">
-        <Group>
-          <TextInput
-            placeholder="Search roles..."
-            leftSection={<IconSearch size={16} />}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.currentTarget.value)}
-            style={{ flex: 1 }}
-          />
-          <Select
-            placeholder="Filter by status"
-            data={["Active", "Inactive"]}
-            value={statusFilter}
-            onChange={setStatusFilter}
-            clearable
-          />
-        </Group>
-      </Paper>
+        {/* Filters */}
+        <Card withBorder p="md">
+          <Group gap="md">
+            <TextInput
+              placeholder="Search roles..."
+              leftSection={<IconSearch size={16} />}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.currentTarget.value)}
+              style={{ flex: 1, minWidth: 200 }}
+            />
+          </Group>
+        </Card>
 
-      <Paper>
-        <Table>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>Role Name</Table.Th>
-              <Table.Th>Description</Table.Th>
-              <Table.Th>Users</Table.Th>
-              <Table.Th>Key Permissions</Table.Th>
-              <Table.Th>Status</Table.Th>
-              <Table.Th>Actions</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {filteredRoles.map((role) => (
-              <Table.Tr key={role.id}>
-                <Table.Td>
-                  <Text fw={500}>{role.name}</Text>
-                  <Text size="sm" c="dimmed">{role.id}</Text>
-                </Table.Td>
-                <Table.Td>
-                  <Text size="sm">{role.description}</Text>
-                </Table.Td>
-                <Table.Td>
-                  <Badge variant="light" color="blue">
-                    {role.userCount} users
-                  </Badge>
-                </Table.Td>
-                <Table.Td>
-                  <Text size="sm">
-                    {role.permissions.slice(0, 2).join(", ")}
-                    {role.permissions.length > 2 && ` +${role.permissions.length - 2} more`}
-                  </Text>
-                </Table.Td>
-                <Table.Td>
-                  <Badge color={role.status === "Active" ? "green" : "red"}>
-                    {role.status}
-                  </Badge>
-                </Table.Td>
-                <Table.Td>
-                  <Group gap="xs">
-                    <ActionIcon
-                      component={Link}
-                      href={`/application/roles/${role.id}`}
-                      variant="subtle"
-                      color="blue"
-                    >
-                      <IconEdit size={16} />
-                    </ActionIcon>
-                    <ActionIcon variant="subtle" color="red">
-                      <IconTrash size={16} />
-                    </ActionIcon>
-                  </Group>
-                </Table.Td>
+        {/* Table */}
+        <Card withBorder p={0}>
+          <Table highlightOnHover striped>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th style={{ fontWeight: 600 }}>Role Name</Table.Th>
+                <Table.Th style={{ fontWeight: 600, textAlign: "center" }}>
+                  Actions
+                </Table.Th>
               </Table.Tr>
-            ))}
-          </Table.Tbody>
-        </Table>
-      </Paper>
+            </Table.Thead>
+            <Table.Tbody>
+              {filteredRoles.length > 0 ? (
+                filteredRoles.map((role) => (
+                  <Table.Tr key={role.id}>
+                    <Table.Td>
+                      <div>
+                        <Text fw={500} size="sm">
+                          {role.name}
+                        </Text>
+                      </div>
+                    </Table.Td>
+                    <Table.Td>
+                      <Group gap={4} justify="center">
+                        <ActionIcon
+                          component={Link}
+                          href={`/application/roles/${role.id}`}
+                          variant="subtle"
+                          color="blue"
+                          size="sm"
+                        >
+                          <IconEye size={14} />
+                        </ActionIcon>
+                      </Group>
+                    </Table.Td>
+                  </Table.Tr>
+                ))
+              ) : (
+                <Table.Tr>
+                  <Table.Td colSpan={4}>
+                    <Text ta="center" c="dimmed" py="xl">
+                      {searchTerm
+                        ? "No roles found matching your search"
+                        : "No roles available"}
+                    </Text>
+                  </Table.Td>
+                </Table.Tr>
+              )}
+            </Table.Tbody>
+          </Table>
+        </Card>
+      </Stack>
     </Container>
   );
 }

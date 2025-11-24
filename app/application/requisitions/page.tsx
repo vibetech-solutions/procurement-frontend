@@ -29,7 +29,6 @@ import {
   IconEdit,
   IconGrid3x3,
   IconList,
-  IconCheck,
   IconX,
 } from "@tabler/icons-react";
 import Link from "next/link";
@@ -39,8 +38,7 @@ import { useState } from "react";
 
 export default function RequisitionsPage() {
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
-  const [approveModalOpen, setApproveModalOpen] = useState(false);
-  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedRequisition, setSelectedRequisition] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
 
@@ -49,15 +47,12 @@ export default function RequisitionsPage() {
     setCancelModalOpen(true);
   };
 
-  const handleAcceptRequisition = (reqId: string) => {
+  const handleDeleteRequest = (reqId: string) => {
     setSelectedRequisition(reqId);
-    setApproveModalOpen(true);
+    setDeleteModalOpen(true);
   };
 
-  const handleRejectRequisition = (reqId: string) => {
-    setSelectedRequisition(reqId);
-    setRejectModalOpen(true);
-  };
+
 
   const confirmCancel = () => {
     // Handle cancel logic here
@@ -66,17 +61,14 @@ export default function RequisitionsPage() {
     setSelectedRequisition(null);
   };
 
-  const confirmApprove = () => {
-    setApproveModalOpen(false)
-    setSelectedRequisition(null)
-    // Handle acceptance logic
+  const confirmDelete = () => {
+    // Handle delete logic here
+    console.log('Deleting requisition:', selectedRequisition);
+    setDeleteModalOpen(false);
+    setSelectedRequisition(null);
   };
 
-  const confirmReject = () => {
-    setRejectModalOpen(false)
-    setSelectedRequisition(null)
-    // Handle rejection logic
-  };
+
 
   return (
     <Stack gap="lg">
@@ -196,24 +188,6 @@ export default function RequisitionsPage() {
                           <IconEdit size={16} />
                         </Link>
                       </ActionIcon>
-                      {req.status === "Approved" && (
-                        <>
-                          <ActionIcon 
-                            variant="subtle" 
-                            color="green"
-                            onClick={() => handleAcceptRequisition(req.id)}
-                          >
-                            <IconCheck size={16} />
-                          </ActionIcon>
-                          <ActionIcon 
-                            variant="subtle" 
-                            color="red"
-                            onClick={() => handleRejectRequisition(req.id)}
-                          >
-                            <IconX size={16} />
-                          </ActionIcon>
-                        </>
-                      )}
                       <Menu shadow="md" width={200}>
                         <Menu.Target>
                           <ActionIcon variant="subtle" color="gray">
@@ -229,13 +203,22 @@ export default function RequisitionsPage() {
                             Download PDF
                           </Menu.Item>
                           <Menu.Item
-                            color="red"
+                            color="orange"
                             leftSection={
-                              <IconTrash style={{ width: rem(14), height: rem(14) }} />
+                              <IconX style={{ width: rem(14), height: rem(14) }} />
                             }
                             onClick={() => handleCancelRequest(req.id)}
                           >
                             Cancel Request
+                          </Menu.Item>
+                          <Menu.Item
+                            color="red"
+                            leftSection={
+                              <IconTrash style={{ width: rem(14), height: rem(14) }} />
+                            }
+                            onClick={() => handleDeleteRequest(req.id)}
+                          >
+                            Delete Request
                           </Menu.Item>
                         </Menu.Dropdown>
                       </Menu>
@@ -283,24 +266,6 @@ export default function RequisitionsPage() {
                           <IconEdit size={16} />
                         </Link>
                       </ActionIcon>
-                      {req.status === "Approved" && (
-                        <>
-                          <ActionIcon 
-                            variant="subtle" 
-                            color="green"
-                            onClick={() => handleAcceptRequisition(req.id)}
-                          >
-                            <IconCheck size={16} />
-                          </ActionIcon>
-                          <ActionIcon 
-                            variant="subtle" 
-                            color="red"
-                            onClick={() => handleRejectRequisition(req.id)}
-                          >
-                            <IconX size={16} />
-                          </ActionIcon>
-                        </>
-                      )}
                       <Menu shadow="md" width={200}>
                         <Menu.Target>
                           <ActionIcon variant="subtle" color="gray">
@@ -314,11 +279,18 @@ export default function RequisitionsPage() {
                             Download PDF
                           </Menu.Item>
                           <Menu.Item
-                            color="red"
-                            leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
+                            color="orange"
+                            leftSection={<IconX style={{ width: rem(14), height: rem(14) }} />}
                             onClick={() => handleCancelRequest(req.id)}
                           >
                             Cancel Request
+                          </Menu.Item>
+                          <Menu.Item
+                            color="red"
+                            leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
+                            onClick={() => handleDeleteRequest(req.id)}
+                          >
+                            Delete Request
                           </Menu.Item>
                         </Menu.Dropdown>
                       </Menu>
@@ -339,38 +311,41 @@ export default function RequisitionsPage() {
       >
         <Stack gap="md">
           <Text size="sm">
-            Are you sure you want to cancel requisition {selectedRequisition}? This action cannot be undone.
+            Are you sure you want to cancel requisition {selectedRequisition}? This will mark it as cancelled but keep it in the system.
           </Text>
           <Group justify="flex-end" gap="sm">
             <Button variant="outline" onClick={() => setCancelModalOpen(false)}>
-              Keep Request
+              Keep Active
             </Button>
-            <Button color="red" onClick={confirmCancel}>
+            <Button color="orange" onClick={confirmCancel}>
               Cancel Request
             </Button>
           </Group>
         </Stack>
       </Modal>
 
-      <Modal opened={rejectModalOpen} onClose={() => setRejectModalOpen(false)} title="Reject Requisition" centered>
+      <Modal
+        opened={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        title="Delete Requisition"
+        centered
+      >
         <Stack gap="md">
-          <Text>Are you sure you want to reject this requisition? This action cannot be undone.</Text>
-          <Group justify="flex-end" gap="md">
-            <Button variant="outline" onClick={() => setRejectModalOpen(false)}>Cancel</Button>
-            <Button color="red" onClick={confirmReject}>Reject</Button>
+          <Text size="sm">
+            Are you sure you want to permanently delete requisition {selectedRequisition}? This action cannot be undone.
+          </Text>
+          <Group justify="flex-end" gap="sm">
+            <Button variant="outline" onClick={() => setDeleteModalOpen(false)}>
+              Keep Request
+            </Button>
+            <Button color="red" onClick={confirmDelete}>
+              Delete Permanently
+            </Button>
           </Group>
         </Stack>
       </Modal>
 
-      <Modal opened={approveModalOpen} onClose={() => setApproveModalOpen(false)} title="Accept Requisition" centered>
-        <Stack gap="md">
-          <Text>Are you sure you want to accept this requisition?</Text>
-          <Group justify="flex-end" gap="md">
-            <Button variant="outline" onClick={() => setApproveModalOpen(false)}>Cancel</Button>
-            <Button color="green" onClick={confirmApprove}>Accept</Button>
-          </Group>
-        </Stack>
-      </Modal>
+
     </Stack>
   );
 }

@@ -19,7 +19,6 @@ import {
   Tabs,
   Select,
   MultiSelect,
-
   Checkbox,
 } from "@mantine/core";
 import { RichTextEditor } from "@mantine/tiptap";
@@ -39,7 +38,6 @@ import {
   IconMail,
   IconLock,
   IconTruck,
-
 } from "@tabler/icons-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import Link from "next/link";
@@ -94,8 +92,6 @@ export default function Registration() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const dispatch = useAppDispatch();
   const router = useRouter();
-
-
 
   useEffect(() => {
     const formData = {
@@ -369,23 +365,39 @@ export default function Registration() {
         setLoading(false);
       } catch (error: unknown) {
         let errorMessage = "Registration failed";
-        
+
         if (error && typeof error === "object" && "response" in error) {
-          const axiosError = error as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } };
-          if (axiosError.response?.data?.errors) {
+          const axiosError = error as {
+            response?: {
+              status?: number;
+              data?: { message?: string; errors?: Record<string, string[]> };
+            };
+          };
+
+          if (
+            axiosError.response?.status === 422 &&
+            axiosError.response?.data?.errors
+          ) {
             const errors = axiosError.response.data.errors;
             const errorMessages = Object.entries(errors)
               .map(([field, messages]) => {
-                const fieldName = field.replace(/\./g, ' ').replace(/([A-Z])/g, ' $1').toLowerCase();
-                return `${fieldName}: ${Array.isArray(messages) ? messages[0] : messages}`;
+                const fieldName = field
+                  .replace(/\./g, " ")
+                  .replace(/([A-Z])/g, " $1")
+                  .toLowerCase();
+                return `${fieldName}: ${
+                  Array.isArray(messages) ? messages[0] : messages
+                }`;
               })
-              .join('\n');
+              .join("\n");
             errorMessage = errorMessages;
           } else if (axiosError.response?.data?.message) {
             errorMessage = axiosError.response.data.message;
           }
         } else if (error instanceof Error) {
           errorMessage = error.message;
+        } else if (typeof error === "string") {
+          errorMessage = error;
         }
         notifications.show({
           title: "Error",

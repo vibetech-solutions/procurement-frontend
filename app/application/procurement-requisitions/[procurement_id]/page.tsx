@@ -18,7 +18,7 @@ import {
   TextInput,
   ScrollArea,
 } from "@mantine/core"
-import { IconArrowLeft, IconFileText, IconMessage, IconChevronDown, IconSend } from "@tabler/icons-react"
+import { IconArrowLeft, IconFileText, IconMessage, IconChevronDown, IconSend, IconDownload, IconEye } from "@tabler/icons-react"
 import Link from "next/link"
 import { useState } from "react"
 
@@ -85,15 +85,6 @@ export default function ViewProcurement() {
             Back to Procurement
           </Button>
         </Group>
-        {purchaseOrderId && (
-          <Button
-            leftSection={<IconFileText size={16} />}
-            component={Link}
-            href={`/application/purchase-orders/${purchaseOrderId}`}
-          >
-            View Purchase Order
-          </Button>
-        )}
       </Group>
 
       <Card shadow="sm" padding="xl" radius="md" withBorder>
@@ -380,6 +371,112 @@ export default function ViewProcurement() {
             )}
           </Group>
         </Stack>
+      </Card>
+
+      {/* Documents Card */}
+      <Card shadow="sm" padding="lg" radius="md" withBorder>
+        <Title order={4} mb="md">
+          Associated Documents
+        </Title>
+        <Table>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Document Type</Table.Th>
+              <Table.Th>Document ID</Table.Th>
+              <Table.Th>Created Date</Table.Th>
+              <Table.Th>Status</Table.Th>
+              <Table.Th>Actions</Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            <Table.Tr>
+              <Table.Td>
+                <Group gap="xs">
+                  <IconFileText size={16} />
+                  <Text fw={500}>Purchase Order</Text>
+                </Group>
+              </Table.Td>
+              <Table.Td>
+                <Text c="blue" fw={500}>{purchaseOrderId || 'PO-2025-001'}</Text>
+              </Table.Td>
+              <Table.Td>
+                <Text size="sm">Jan 16, 2025</Text>
+              </Table.Td>
+              <Table.Td>
+                <Badge color="green" variant="light">Active</Badge>
+              </Table.Td>
+              <Table.Td>
+                <Group gap="xs">
+                  <ActionIcon
+                    variant="subtle"
+                    color="blue"
+                    component={Link}
+                    href={`/application/purchase-orders/${purchaseOrderId || 'PO-2025-001'}`}
+                  >
+                    <IconEye size={16} />
+                  </ActionIcon>
+                  <ActionIcon variant="subtle" color="gray">
+                    <IconDownload size={16} />
+                  </ActionIcon>
+                </Group>
+              </Table.Td>
+            </Table.Tr>
+            <Table.Tr>
+              <Table.Td>
+                <Group gap="xs">
+                  <IconFileText size={16} />
+                  <Text fw={500}>RFQ Document</Text>
+                </Group>
+              </Table.Td>
+              <Table.Td>
+                <Text c="blue" fw={500}>RFQ-2025-007</Text>
+              </Table.Td>
+              <Table.Td>
+                <Text size="sm">Jan 15, 2025</Text>
+              </Table.Td>
+              <Table.Td>
+                <Badge color="blue" variant="light">Sent</Badge>
+              </Table.Td>
+              <Table.Td>
+                <Group gap="xs">
+                  <ActionIcon variant="subtle" color="blue">
+                    <IconEye size={16} />
+                  </ActionIcon>
+                  <ActionIcon variant="subtle" color="gray">
+                    <IconDownload size={16} />
+                  </ActionIcon>
+                </Group>
+              </Table.Td>
+            </Table.Tr>
+            <Table.Tr>
+              <Table.Td>
+                <Group gap="xs">
+                  <IconFileText size={16} />
+                  <Text fw={500}>Quotation</Text>
+                </Group>
+              </Table.Td>
+              <Table.Td>
+                <Text c="blue" fw={500}>QUO-2025-012</Text>
+              </Table.Td>
+              <Table.Td>
+                <Text size="sm">Jan 16, 2025</Text>
+              </Table.Td>
+              <Table.Td>
+                <Badge color="green" variant="light">Received</Badge>
+              </Table.Td>
+              <Table.Td>
+                <Group gap="xs">
+                  <ActionIcon variant="subtle" color="blue">
+                    <IconEye size={16} />
+                  </ActionIcon>
+                  <ActionIcon variant="subtle" color="gray">
+                    <IconDownload size={16} />
+                  </ActionIcon>
+                </Group>
+              </Table.Td>
+            </Table.Tr>
+          </Table.Tbody>
+        </Table>
       </Card>
       
       {/* Floating Chat Widget */}

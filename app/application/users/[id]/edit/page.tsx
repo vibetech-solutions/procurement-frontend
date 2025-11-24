@@ -85,7 +85,7 @@ export default function EditUserPage({
         last_name: formData?.last_name || "",
         email: formData?.email || "",
         phone: formData?.phone || "",
-        roles: formData?.roles?.map((role: Role) => ({ name: role.name })) || [],
+        roles: formData?.roles?.map((role: Role) => ({ id: role.id, name: role.name })) || [],
       };
       const result = await dispatch(editUser(payload));
       if (editUser.fulfilled.match(result)) {
