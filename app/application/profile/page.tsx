@@ -100,33 +100,21 @@ export default function ProfilePage() {
 
   useEffect(() => {
     setIsClient(true);
-    dispatch(fetchUser()).catch(() => {
-      notifications.show({
-        title: "Error",
-        message: "Failed to load user data",
-        color: "red",
-      });
-    });
+    dispatch(fetchUser());
     const fetchSettings = async () => {
       await clientaxiosinstance.get("/sanctum/csrf-cookie");
       const response = await clientaxiosinstance.get("/api/settings");
       const settings = response.data;
       setSettings(settings);
     };
-    fetchSettings().catch(() => {
-      notifications.show({
-        title: "Error",
-        message: "Failed to load settings",
-        color: "red",
-      });
-    });
+    fetchSettings();
   }, [dispatch]);
 
   useEffect(() => {
     if (user) {
       try {
         setEditUser({ ...user });
-        setUserSettings(prev => {
+        setUserSettings((prev) => {
           const newSettings = {
             language: user.settings?.language || "",
             timezone: user.settings?.timezone || "",
@@ -148,8 +136,7 @@ export default function ProfilePage() {
             two_factor_auth: user.settings?.two_factor_auth || false,
             login_notifications: user.settings?.login_notifications || false,
           };
-          
-          // Only update if different to prevent infinite loops
+
           if (JSON.stringify(prev) !== JSON.stringify(newSettings)) {
             return newSettings;
           }
@@ -221,8 +208,6 @@ export default function ProfilePage() {
         message: "Settings updated successfully",
         color: "green",
       });
-
-      dispatch(fetchUser());
     } catch {
       notifications.show({
         title: "Error",
@@ -252,8 +237,6 @@ export default function ProfilePage() {
         message: "Profile picture updated successfully",
         color: "green",
       });
-
-      dispatch(fetchUser());
       setProfilePic(null);
     } catch (error: unknown) {
       let errorMessage = "Failed to update profile";

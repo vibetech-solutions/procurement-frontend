@@ -38,15 +38,13 @@ export function LandingNavbar() {
   const dispatch = useAppDispatch();
   const router = useRouter();
 
-  const { user, loading } = useAppSelector(
+  const { user } = useAppSelector(
     (state: RootState) => state.auth
   ) as { user: User | null; loading: boolean };
 
   useEffect(() => {
-    if (!user && !loading) {
-      dispatch(fetchUser());
-    }
-  }, [dispatch, user, loading]);
+    dispatch(fetchUser());
+  }, [dispatch]);
 
   const handleLogout = async () => {
     try {
@@ -62,7 +60,8 @@ export function LandingNavbar() {
       });
       router.push("/auth/login");
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Something went wrong";
+      const errorMessage =
+        error instanceof Error ? error.message : "Something went wrong";
       notifications.show({
         title: "Error",
         message: errorMessage,
@@ -135,7 +134,9 @@ export function LandingNavbar() {
                     component={Link}
                     href="/application/master-settings"
                     leftSection={
-                      <IconSettings style={{ width: rem(14), height: rem(14) }} />
+                      <IconSettings
+                        style={{ width: rem(14), height: rem(14) }}
+                      />
                     }
                   >
                     Settings
@@ -173,7 +174,7 @@ export function LandingNavbar() {
       <Drawer opened={opened} onClose={close} position="right" size="xs">
         <Stack gap="md" p="md">
           <ThemeToggle />
-          
+
           {user ? (
             <>
               <Group>
@@ -185,7 +186,7 @@ export function LandingNavbar() {
                 </Avatar>
                 <Text size="sm">{user.email}</Text>
               </Group>
-              
+
               <Button
                 component={Link}
                 href="/application/profile"
@@ -195,7 +196,7 @@ export function LandingNavbar() {
               >
                 Profile
               </Button>
-              
+
               <Button
                 component={Link}
                 href="/application/master-settings"
@@ -205,7 +206,7 @@ export function LandingNavbar() {
               >
                 Settings
               </Button>
-              
+
               <Button
                 variant="subtle"
                 leftSection={<IconHelp size={16} />}
@@ -213,7 +214,7 @@ export function LandingNavbar() {
               >
                 Help
               </Button>
-              
+
               <Button
                 variant="subtle"
                 leftSection={<IconBell size={16} />}
@@ -221,7 +222,7 @@ export function LandingNavbar() {
               >
                 Notifications
               </Button>
-              
+
               <Button
                 color="red"
                 variant="subtle"
@@ -244,11 +245,7 @@ export function LandingNavbar() {
               >
                 Login
               </Button>
-              <Button
-                component={Link}
-                href="/auth/register"
-                onClick={close}
-              >
+              <Button component={Link} href="/auth/register" onClick={close}>
                 Sign Up
               </Button>
             </>

@@ -13,7 +13,6 @@ import {
   ScrollArea,
   NavLink,
   CheckIcon,
-
   Center,
   Loader,
 } from "@mantine/core";
@@ -24,7 +23,6 @@ import {
   IconUser,
   IconChevronDown,
   IconBell,
-
 } from "@tabler/icons-react";
 import { ThemeToggle } from "../../components/theme-toggle";
 import { useRouter, usePathname } from "next/navigation";
@@ -48,7 +46,7 @@ export default function SupplierLayout({
   const pathname = usePathname();
   const dispatch = useAppDispatch();
   const { user, loading } = useAppSelector((state: RootState) => state.auth);
-  const [loadingTimeout, setLoadingTimeout] = useState(false);
+  const [loadingTimeout] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -80,12 +78,6 @@ export default function SupplierLayout({
 
   useEffect(() => {
     dispatch(fetchUser());
-
-    const timeout = setTimeout(() => {
-      setLoadingTimeout(true);
-    }, 10000);
-
-    return () => clearTimeout(timeout);
   }, [dispatch]);
 
   const {

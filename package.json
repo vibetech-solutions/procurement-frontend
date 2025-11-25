@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@mantine/core": "^8.3.3",
+    "@mantine/dates": "^8.3.9",
     "@mantine/dropzone": "^8.3.8",
     "@mantine/hooks": "^8.3.3",
     "@mantine/notifications": "^8.3.3",
@@ -26,6 +27,7 @@
     "@tiptap/starter-kit": "^3.8.0",
     "axios": "^1.12.2",
     "date-fns": "^4.1.0",
+    "dayjs": "^1.11.19",
     "next": "15.5.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",
