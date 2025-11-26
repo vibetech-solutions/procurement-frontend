@@ -14,7 +14,7 @@ import {
   ActionIcon,
 } from "@mantine/core"
 import { IconSearch, IconEye } from "@tabler/icons-react"
-import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 function getStatusColor(status: string) {
   switch (status) {
@@ -30,7 +30,6 @@ function getStatusColor(status: string) {
 }
 
 export default function RFQsPage() {
-  const router = useRouter()
 
   return (
     <Stack gap="lg">
@@ -109,9 +108,11 @@ export default function RFQsPage() {
                   </Text>
                 </Table.Td>
                 <Table.Td>
-                  <ActionIcon variant="subtle" color="blue" onClick={() => router.push(`/application/rfqs/${rfq.id}`)}>
-                    <IconEye size={16} />
-                  </ActionIcon>
+                  <Link href={`/application/rfqs/${rfq.id}`}>
+                    <ActionIcon variant="subtle" color="blue">
+                      <IconEye size={16} />
+                    </ActionIcon>
+                  </Link>
                 </Table.Td>
               </Table.Tr>
             ))}

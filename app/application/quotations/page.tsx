@@ -18,6 +18,7 @@ import {
 } from "@mantine/core"
 import { IconSearch, IconEye, IconCheck, IconX } from "@tabler/icons-react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { useState } from "react"
 
 function getStatusColor(status: string) {
@@ -135,9 +136,11 @@ export default function QuotationsPage() {
                 </Table.Td>
                 <Table.Td>
                   <Group gap="xs">
-                    <ActionIcon variant="subtle" color="blue" onClick={() => router.push(`/application/quotations/${quotation.id}`)}>
-                      <IconEye size={16} />
-                    </ActionIcon>
+                    <Link href={`/application/quotations/${quotation.id}`}>
+                      <ActionIcon variant="subtle" color="blue">
+                        <IconEye size={16} />
+                      </ActionIcon>
+                    </Link>
                     {quotation.status === "Pending Review" && (
                       <>
                         <ActionIcon 

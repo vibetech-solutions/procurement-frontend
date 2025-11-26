@@ -33,7 +33,7 @@ import {
   IconTrash,
   IconAlertCircle,
 } from "@tabler/icons-react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import { notifications } from "@mantine/notifications";
 import { fetchUser } from "@/lib/redux/features/auth/authSlice";
@@ -41,7 +41,6 @@ import { fetchUser } from "@/lib/redux/features/auth/authSlice";
 let ITEMS_PER_PAGE = 10;
 
 export default function UsersPage() {
-  const router = useRouter();
   const dispatch = useAppDispatch();
 
   const { users, usersLoading, usersError } = useAppSelector(
@@ -228,7 +227,8 @@ export default function UsersPage() {
           </div>
           <Button
             leftSection={<IconPlus size={16} />}
-            onClick={() => router.push("/application/users/new")}
+            component={Link}
+            href="/application/users/new"
           >
             Add User
           </Button>
@@ -322,9 +322,8 @@ export default function UsersPage() {
                           <ActionIcon
                             variant="subtle"
                             color="blue"
-                            onClick={() =>
-                              router.push(`/application/users/${user.id}`)
-                            }
+                            component="a"
+                            href={`/application/users/${user.id}`}
                             aria-label="View user"
                           >
                             <IconEye size={16} />
@@ -332,9 +331,8 @@ export default function UsersPage() {
                           <ActionIcon
                             variant="subtle"
                             color="yellow"
-                            onClick={() =>
-                              router.push(`/application/users/${user.id}/edit`)
-                            }
+                            component="a"
+                            href={`/application/users/${user.id}/edit`}
                             aria-label="Edit user"
                           >
                             <IconEdit size={16} />

@@ -13,6 +13,7 @@ import {
   IconClock,
   IconTruck,
   IconUser,
+  IconHammer,
 } from "@tabler/icons-react";
 
 export const landingPageFeatures = [
@@ -29,10 +30,10 @@ export const landingPageFeatures = [
       "Create, track, and manage requisitions with automated approval workflows",
   },
   {
-    icon: IconUsers,
-    title: "Multi-Role Access",
+    icon: IconHammer,
+    title: "Disposal Auctions",
     description:
-      "Role-based permissions for requesters, managers, and procurement officers",
+      "Manage asset disposal through internal auctions and participate in external bidding opportunities",
   },
   {
     icon: IconShield,
@@ -137,7 +138,14 @@ export const navItems = [
       { label: "Material Receipts", href: "/material-receipts" },
       { label: "Contracts", href: "/contracts" },
       { label: "Suppliers", href: "/suppliers" },
-      { label: "Disposal Auctions", href: "/disposal-auctions" },
+      {
+        label: "Disposal Auctions",
+        href: "/disposal-auctions",
+        children: [
+          { label: "Internal Auctions", href: "/disposal-auctions/internal" },
+          { label: "External Auctions", href: "/disposal-auctions/external" },
+        ],
+      },
     ],
   },
 

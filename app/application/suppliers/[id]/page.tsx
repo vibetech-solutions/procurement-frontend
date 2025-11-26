@@ -13,8 +13,9 @@ import {
   ActionIcon,
   Table,
 } from "@mantine/core"
-import { IconArrowLeft, IconEdit, IconMail, IconEye, IconPlus } from "@tabler/icons-react"
+import { IconArrowLeft, IconMail, IconEye, IconPlus } from "@tabler/icons-react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 interface SupplierDetailProps {
   params: { id: string }
@@ -38,19 +39,14 @@ export default function SupplierDetailPage({ params }: SupplierDetailProps) {
 
   return (
     <Stack gap="lg">
-      <Group justify="space-between">
-        <Group>
-          <ActionIcon variant="subtle" size="lg" onClick={() => router.back()}>
-            <IconArrowLeft size={20} />
-          </ActionIcon>
-          <div>
-            <Title order={2}>{supplier.name}</Title>
-            <Text c="dimmed" size="sm">Supplier {supplier.id}</Text>
-          </div>
-        </Group>
-        <Button leftSection={<IconEdit size={16} />} variant="outline">
-          Edit Supplier
-        </Button>
+      <Group>
+        <ActionIcon variant="subtle" size="lg" onClick={() => router.back()}>
+          <IconArrowLeft size={20} />
+        </ActionIcon>
+        <div>
+          <Title order={2}>{supplier.name}</Title>
+          <Text c="dimmed" size="sm">Supplier {supplier.id}</Text>
+        </div>
       </Group>
 
       <Grid gutter="lg">
@@ -88,7 +84,12 @@ export default function SupplierDetailPage({ params }: SupplierDetailProps) {
               <Button variant="light" fullWidth>
                 Create RFQ
               </Button>
-              <Button variant="light" fullWidth>
+              <Button 
+                variant="light" 
+                fullWidth
+component={Link}
+                href={`/application/contracts/new?type=supplier-agreement&supplierId=${supplier.id}&supplierName=${encodeURIComponent(supplier.name)}&supplierEmail=${encodeURIComponent(supplier.email)}`}
+              >
                 New Contract
               </Button>
               <Button variant="light" fullWidth>
@@ -102,7 +103,12 @@ export default function SupplierDetailPage({ params }: SupplierDetailProps) {
       <Card shadow="sm" padding="lg" radius="md" withBorder>
         <Group justify="space-between" mb="md">
           <Title order={4}>Contracts</Title>
-          <Button leftSection={<IconPlus size={16} />} size="sm">
+          <Button 
+            leftSection={<IconPlus size={16} />} 
+            size="sm"
+            component={Link}
+            href={`/application/contracts/new?type=supplier-agreement&supplierId=${supplier.id}&supplierName=${encodeURIComponent(supplier.name)}&supplierEmail=${encodeURIComponent(supplier.email)}`}
+          >
             New Contract
           </Button>
         </Group>
@@ -148,9 +154,11 @@ export default function SupplierDetailPage({ params }: SupplierDetailProps) {
                     </Badge>
                   </Table.Td>
                   <Table.Td>
-                    <ActionIcon variant="subtle" color="blue" onClick={() => router.push(`/application/contracts/${contract.id}`)}>
-                      <IconEye size={16} />
-                    </ActionIcon>
+                    <Link href={`/application/contracts/${contract.id}`}>
+                      <ActionIcon variant="subtle" color="blue">
+                        <IconEye size={16} />
+                      </ActionIcon>
+                    </Link>
                   </Table.Td>
                 </Table.Tr>
               ))

@@ -13,7 +13,7 @@ import {
   ActionIcon,
 } from "@mantine/core"
 import { IconSearch, IconEye } from "@tabler/icons-react"
-import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { materialReceiptsData } from "@/lib/utils/constants"
 
 
@@ -28,7 +28,6 @@ function getStatusColor(status: string) {
 }
 
 export default function MaterialReceiptsPage() {
-  const router = useRouter()
 
   return (
     <Stack gap="lg">
@@ -103,9 +102,11 @@ export default function MaterialReceiptsPage() {
                   </Text>
                 </Table.Td>
                 <Table.Td>
-                  <ActionIcon variant="subtle" color="blue" onClick={() => router.push(`/application/material-receipts/${receipt.id}`)}>
-                    <IconEye size={16} />
-                  </ActionIcon>
+                  <Link href={`/application/material-receipts/${receipt.id}`}>
+                    <ActionIcon variant="subtle" color="blue">
+                      <IconEye size={16} />
+                    </ActionIcon>
+                  </Link>
                 </Table.Td>
               </Table.Tr>
             ))}

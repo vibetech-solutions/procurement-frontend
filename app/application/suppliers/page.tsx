@@ -13,12 +13,16 @@ import {
   TextInput,
   Select,
   ActionIcon,
+  Modal,
+  Checkbox,
 } from "@mantine/core"
 import { IconSearch, IconPlus, IconEye } from "@tabler/icons-react"
-import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { useState } from "react"
 
 export default function SuppliersPage() {
-  const router = useRouter()
+  const [addModalOpen, setAddModalOpen] = useState(false)
+  const [selectedSuppliers, setSelectedSuppliers] = useState<string[]>([])
 
   return (
     <Stack gap="lg">
@@ -31,7 +35,7 @@ export default function SuppliersPage() {
             Manage suppliers and their contracts
           </Text>
         </div>
-        <Button leftSection={<IconPlus size={16} />}>
+        <Button leftSection={<IconPlus size={16} />} onClick={() => setAddModalOpen(true)}>
           Add Supplier
         </Button>
       </Group>
@@ -84,15 +88,82 @@ export default function SuppliersPage() {
                   </Group>
                 </Table.Td>
                 <Table.Td>
-                  <ActionIcon variant="subtle" color="blue" onClick={() => router.push(`/application/suppliers/${supplier.id}`)}>
-                    <IconEye size={16} />
-                  </ActionIcon>
+                  <Link href={`/application/suppliers/${supplier.id}`}>
+                    <ActionIcon variant="subtle" color="blue">
+                      <IconEye size={16} />
+                    </ActionIcon>
+                  </Link>
                 </Table.Td>
               </Table.Tr>
             ))}
           </Table.Tbody>
         </Table>
       </Card>
+
+      <Modal
+        opened={addModalOpen}
+        onClose={() => setAddModalOpen(false)}
+        title="Add Suppliers"
+        size="lg"
+        centered
+      >
+        <Stack gap="md">
+          <Text size="sm" c="dimmed">
+            Select suppliers to add to your network:
+          </Text>
+          
+          <TextInput
+            placeholder="Search available suppliers..."
+            leftSection={<IconSearch size={16} />}
+            mb="md"
+          />
+          
+          <Stack gap="xs" mah={400} style={{ overflowY: 'auto' }}>
+            {suppliers.map((supplier) => (
+              <Card key={supplier.id} withBorder p="sm">
+                <Group justify="space-between">
+                  <div>
+                    <Text fw={500} size="sm">{supplier.name}</Text>
+                    <Text size="xs" c="dimmed">{supplier.email}</Text>
+                    <Group gap="xs" mt={4}>
+                      {supplier.categories.slice(0, 2).map((category, index) => (
+                        <Badge key={index} variant="light" size="xs">
+                          {category}
+                        </Badge>
+                      ))}
+                    </Group>
+                  </div>
+                  <Checkbox
+                    checked={selectedSuppliers.includes(supplier.id)}
+                    onChange={(e) => {
+                      if (e.currentTarget.checked) {
+                        setSelectedSuppliers([...selectedSuppliers, supplier.id])
+                      } else {
+                        setSelectedSuppliers(selectedSuppliers.filter(id => id !== supplier.id))
+                      }
+                    }}
+                  />
+                </Group>
+              </Card>
+            ))}
+          </Stack>
+          
+          <Group justify="flex-end" gap="sm" mt="md">
+            <Button variant="outline" onClick={() => setAddModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                setAddModalOpen(false)
+                setSelectedSuppliers([])
+              }}
+              disabled={selectedSuppliers.length === 0}
+            >
+              Add {selectedSuppliers.length} Supplier{selectedSuppliers.length !== 1 ? 's' : ''}
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </Stack>
   )
 }

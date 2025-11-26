@@ -24,20 +24,47 @@ export function Navigation() {
               key={item.href}
               label={item.label}
               leftSection={<item.icon size={20} stroke={1.5} />}
-              active={item.children.some(child => pathname === `${baseHref}${child.href}`)}
+              active={item.children.some(child => 
+                'children' in child && child.children 
+                  ? child.children.some((grandchild: { href: string }) => pathname === `${baseHref}${grandchild.href}`)
+                  : pathname === `${baseHref}${child.href}`
+              )}
               variant="filled"
               mb={4}
             >
-              {item.children.map((child) => (
-                <NavLink
-                  key={child.href}
-                  component={Link}
-                  href={`${baseHref}${child.href}`}
-                  label={child.label}
-                  active={pathname === `${baseHref}${child.href}`}
-                  variant="filled"
-                />
-              ))}
+              {item.children.map((child) => {
+                if ('children' in child && child.children && Array.isArray(child.children)) {
+                  return (
+                    <NavLink
+                      key={child.href}
+                      label={child.label}
+                      active={child.children.some((grandchild: { href: string }) => pathname === `${baseHref}${grandchild.href}`)}
+                      variant="filled"
+                    >
+                      {child.children.map((grandchild: { href: string; label: string }) => (
+                        <NavLink
+                          key={grandchild.href}
+                          component={Link}
+                          href={`${baseHref}${grandchild.href}`}
+                          label={grandchild.label}
+                          active={pathname === `${baseHref}${grandchild.href}`}
+                          variant="filled"
+                        />
+                      ))}
+                    </NavLink>
+                  );
+                }
+                return (
+                  <NavLink
+                    key={child.href}
+                    component={Link}
+                    href={`${baseHref}${child.href}`}
+                    label={child.label}
+                    active={pathname === `${baseHref}${child.href}`}
+                    variant="filled"
+                  />
+                );
+              })}
             </NavLink>
           );
         }
