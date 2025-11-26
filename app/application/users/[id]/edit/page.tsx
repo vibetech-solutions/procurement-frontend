@@ -63,7 +63,11 @@ export default function EditUserPage({
   const handleRoleChange = (roleName: string, checked: boolean) => {
     if (!formData) return;
     if (checked) {
-      const newRole = { id: Date.now(), name: roleName };
+      const newRole: Role = { 
+        id: Date.now(), 
+        name: roleName,
+        permissions: []
+      };
       setFormData({
         ...formData,
         roles: [...(formData?.roles || []), newRole],
@@ -85,7 +89,7 @@ export default function EditUserPage({
         last_name: formData?.last_name || "",
         email: formData?.email || "",
         phone: formData?.phone || "",
-        roles: formData?.roles?.map((role: Role) => ({ id: role.id, name: role.name })) || [],
+        roles: formData?.roles?.map((role: Role) => ({ id: role.id, name: role.name, permissions: role.permissions })) || [],
       };
       const result = await dispatch(editUser(payload));
       if (editUser.fulfilled.match(result)) {
@@ -193,7 +197,11 @@ export default function EditUserPage({
                 value={formData?.roles?.[0]?.name || ""}
                 onChange={(value) => {
                   if (value && formData) {
-                    const newRole = { id: Date.now(), name: value };
+                    const newRole: Role = { 
+                      id: Date.now(), 
+                      name: value,
+                      permissions: []
+                    };
                     setFormData({ ...formData, roles: [newRole] });
                   }
                 }}

@@ -1,7 +1,9 @@
 import clientaxiosinstance from "@/lib/services/clientaxiosinstance";
+import { Permission } from "@/types/permission";
 import { Role } from "@/types/role";
 
 import { User } from "@/types/user";
+import { Warehouse } from "@/types/warehouse";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 interface MerchantState {
@@ -17,6 +19,15 @@ interface MerchantState {
   user: User;
   userLoading: boolean;
   userError: string | null;
+  permissions: Record<string, Permission[]>;
+  permissionsLoading: boolean;
+  permissionsError: string | null;
+  warehouses: Warehouse[];
+  warehousesLoading: boolean;
+  warehousesError: string | null;
+  warehouse: Warehouse;
+  warehouseLoading: boolean;
+  warehouseError: string | null;
 }
 
 const state: MerchantState = {
@@ -32,6 +43,15 @@ const state: MerchantState = {
   user: {} as User,
   userLoading: false,
   userError: null,
+  permissions: {},
+  permissionsLoading: false,
+  permissionsError: null,
+  warehouses: [],
+  warehousesLoading: false,
+  warehousesError: null,
+  warehouse: {} as Warehouse,
+  warehouseLoading: false,
+  warehouseError: null,
 };
 
 export const merchantSlice = createSlice({
@@ -130,6 +150,71 @@ export const merchantSlice = createSlice({
       .addCase(fetchRoles.rejected, (state, action) => {
         state.rolesLoading = false;
         state.rolesError = action.error.message ?? "An error occurred";
+      })
+      .addCase(fetchPermissions.pending, (state) => {
+        state.permissionsLoading = true;
+        state.permissionsError = null;
+      })
+      .addCase(fetchPermissions.fulfilled, (state, action) => {
+        state.permissionsLoading = false;
+        state.permissions = action.payload;
+        state.permissionsError = null;
+      })
+      .addCase(fetchPermissions.rejected, (state, action) => {
+        state.permissionsLoading = false;
+        state.permissionsError = action.error.message ?? "An error occurred";
+      })
+      .addCase(fetchWarehouses.pending, (state) => {
+        state.warehousesLoading = true;
+        state.warehousesError = null;
+      })
+      .addCase(fetchWarehouses.fulfilled, (state, action) => {
+        state.warehousesLoading = false;
+        state.warehouses = action.payload;
+        state.warehousesError = null;
+      })
+      .addCase(fetchWarehouses.rejected, (state, action) => {
+        state.warehousesLoading = false;
+        state.warehousesError = action.error.message ?? "An error occurred";
+      })
+      .addCase(editWarehouse.pending, (state) => {
+        state.warehouseLoading = true;
+        state.warehouseError = null;
+      })
+      .addCase(editWarehouse.fulfilled, (state, action) => {
+        state.warehouseLoading = false;
+        state.warehouse = action.payload;
+        state.warehouseError = null;
+      })
+      .addCase(editWarehouse.rejected, (state, action) => {
+        state.warehouseLoading = false;
+        state.warehouseError = action.error.message ?? "An error occurred";
+      })
+      .addCase(addWarehouse.pending, (state) => {
+        state.warehousesLoading = true;
+        state.warehousesError = null;
+      })
+      .addCase(addWarehouse.fulfilled, (state, action) => {
+        state.warehousesLoading = false;
+        state.warehouses.push(action.payload);
+        state.warehousesError = null;
+      })
+      .addCase(addWarehouse.rejected, (state, action) => {
+        state.warehousesLoading = false;
+        state.warehousesError = action.error.message ?? "An error occurred";
+      })
+      .addCase(deleteWarehouse.pending, (state) => {
+        state.warehouseLoading = true;
+        state.warehouseError = null;
+      })
+      .addCase(deleteWarehouse.fulfilled, (state, action) => {
+        state.warehouseLoading = false;
+        state.warehouses = state.warehouses.filter((warehouse) => warehouse.id !== action.payload);
+        state.warehouseError = null;
+      })
+      .addCase(deleteWarehouse.rejected, (state, action) => {
+        state.warehouseLoading = false;
+        state.warehouseError = action.error.message ?? "An error occurred";
       });
   },
 });
@@ -145,6 +230,93 @@ export const fetchRoles = createAsyncThunk("merchants/fetchRoles", async () => {
   const response = await clientaxiosinstance.get("/merchants/roles");
   return response.data as Role[];
 });
+
+export const fetchPermissions = createAsyncThunk(
+  "merchants/fetchPermissions",
+  async () => {
+    await clientaxiosinstance.get("/sanctum/csrf-cookie");
+    const response = await clientaxiosinstance.get("/merchants/permissions");
+    return response.data;
+  }
+);
+
+export const fetchWarehouses = createAsyncThunk(
+  "merchants/fetchWarehouses",
+  async () => {
+    await clientaxiosinstance.get("/sanctum/csrf-cookie");
+    const response = await clientaxiosinstance.get("/merchants/warehouses");
+    return response.data as Warehouse[];
+  }
+);
+
+export const editWarehouse = createAsyncThunk(
+  "merchants/editWarehouse",
+  async (values: Partial<Warehouse> & { id: number }, { rejectWithValue }) => {
+    try {
+      await clientaxiosinstance.get("/sanctum/csrf-cookie");
+      const response = await clientaxiosinstance.put(
+        `/merchants/warehouses/${values.id}`,
+        values
+      );
+      return response.data as Warehouse;
+    } catch (error: unknown) {
+      const errorMessage =
+        error &&
+        typeof error === "object" &&
+        "response" in error &&
+        error.response &&
+        typeof error.response === "object" &&
+        "data" in error.response &&
+        error.response.data &&
+        typeof error.response.data === "object" &&
+        "message" in error.response.data
+          ? String(error.response.data.message)
+          : error instanceof Error
+          ? error.message
+          : "An error occurred";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+export const addWarehouse = createAsyncThunk(
+  "merchants/addWarehouse",
+  async (values: Partial<Warehouse>) => {
+    await clientaxiosinstance.get("/sanctum/csrf-cookie");
+    const response = await clientaxiosinstance.post(
+      "/merchants/warehouses",
+      values
+    );
+    return response.data as Warehouse;
+  }
+);
+
+export const deleteWarehouse = createAsyncThunk(
+  "merchants/deleteWarehouse",
+  async (id: number, { rejectWithValue }) => {
+    try {
+      await clientaxiosinstance.get("/sanctum/csrf-cookie");
+      await clientaxiosinstance.delete(`/merchants/warehouses/${id}`);
+      return id;
+    } catch (error: unknown) {
+      const errorMessage =
+        error &&
+        typeof error === "object" &&
+        "response" in error &&
+        error.response &&
+        typeof error.response === "object" &&
+        "data" in error.response &&
+        error.response.data &&
+        typeof error.response.data === "object" &&
+        "message" in error.response.data
+          ? String(error.response.data.message)
+          : error instanceof Error
+          ? error.message
+          : "An error occurred";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
 
 export const fetchUser = createAsyncThunk(
   "merchants/fetchUser",

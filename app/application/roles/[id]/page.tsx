@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect } from "react";
+import { use, useEffect, useState } from "react";
 import {
   Container,
   Title,
@@ -9,16 +9,18 @@ import {
   Button,
   Group,
   Stack,
-  Badge,
   Grid,
   LoadingOverlay,
+  Checkbox,
+  Tabs,
 } from "@mantine/core";
-import { IconCheck, IconArrowLeft } from "@tabler/icons-react";
+import { IconArrowLeft } from "@tabler/icons-react";
 import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
-import { fetchRole } from "@/lib/redux/features/merchants/merchantSlice";
-
-const selectedPermissions: string[] = [];
+import {
+  fetchPermissions,
+  fetchRole,
+} from "@/lib/redux/features/merchants/merchantSlice";
 
 export default function RoleDetailPage({
   params,
@@ -27,13 +29,24 @@ export default function RoleDetailPage({
 }) {
   const dispatch = useAppDispatch();
   const { id } = use(params);
+  const [mounted, setMounted] = useState(false);
 
-  const { role, roleLoading } = useAppSelector((state) => state.merchants);
+  const { role, roleLoading, permissions, permissionsLoading } = useAppSelector(
+    (state) => state.merchants
+  );
+
   useEffect(() => {
+    setMounted(true);
     dispatch(fetchRole(parseInt(id)));
+    dispatch(fetchPermissions());
   }, [dispatch, id]);
 
-  if (roleLoading) return <LoadingOverlay />;
+  if (!mounted || roleLoading || permissionsLoading)
+    return <LoadingOverlay visible />;
+  if (!role || !role.id) return <div>Role not found</div>;
+
+  const selectedPermissions =
+    role.permissions?.map((permission) => permission.id) || [];
 
   return (
     <Container size="lg">
@@ -55,7 +68,7 @@ export default function RoleDetailPage({
           </Title>
           <Grid>
             <Grid.Col span={6}>
-              <TextInput label="Role Name" value={role.name} disabled />
+              <TextInput label="Role Name" value={role?.name || ""} disabled />
             </Grid.Col>
           </Grid>
         </Paper>
@@ -63,45 +76,35 @@ export default function RoleDetailPage({
         <Paper p="md">
           <Group justify="space-between" mb="md">
             <Title order={4}>Permissions</Title>
-            <Badge color="blue">
-              {selectedPermissions.length} permissions selected
-            </Badge>
           </Group>
 
-          {/* <Stack gap="md">
-            {Object.entries(permissionCategories).map(
-              ([category, permissions]) => (
-                <Card key={category} withBorder>
-                  <Text fw={500} mb="sm">
-                    {category}
-                  </Text>
-                  <Stack gap="xs">
-                    {permissions.map((permission) => (
-                      <Checkbox
-                        key={permission}
-                        label={permission}
-                        checked={selectedPermissions.includes(permission)}
-                        onChange={(e) =>
-                          handlePermissionChange(
-                            permission,
-                            e.currentTarget.checked
-                          )
-                        }
-                      />
-                    ))}
-                  </Stack>
-                </Card>
-              )
-            )}
-          </Stack> */}
-        </Paper>
+          <Tabs defaultValue={Object.keys(permissions)[0]}>
+            <Tabs.List>
+              {Object.keys(permissions).map((groupName) => (
+                <Tabs.Tab key={groupName} value={groupName}>
+                  {groupName}
+                </Tabs.Tab>
+              ))}
+            </Tabs.List>
 
-        <Group justify="flex-end">
-          <Button variant="outline" component={Link} href="/application/roles">
-            Cancel
-          </Button>
-          <Button leftSection={<IconCheck size={16} />}>Save Changes</Button>
-        </Group>
+            {Object.entries(permissions).map(([groupName, groupPermissions]) => (
+              <Tabs.Panel key={groupName} value={groupName} pt="md">
+                <Grid>
+                  {groupPermissions.map((permission) => (
+                    <Grid.Col span={4} key={permission.id}>
+                      <Checkbox
+                        label={permission.name}
+                        value={permission.id}
+                        checked={selectedPermissions.includes(permission.id)}
+                        readOnly
+                      />
+                    </Grid.Col>
+                  ))}
+                </Grid>
+              </Tabs.Panel>
+            ))}
+          </Tabs>
+        </Paper>
       </Stack>
     </Container>
   );

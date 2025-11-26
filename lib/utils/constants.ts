@@ -14,6 +14,7 @@ import {
   IconTruck,
   IconUser,
   IconHammer,
+  IconBox,
 } from "@tabler/icons-react";
 
 export const landingPageFeatures = [
@@ -96,6 +97,7 @@ export const dashboardRecentActivity = [
 
 export const navItems = [
   { label: "Dashboard", icon: IconHome, href: "/application/dashboard" },
+  { label: "Warehouses", icon: IconBox, href: "/application/warehouses" },
   {
     label: "User Management",
     icon: IconUsers,
@@ -155,7 +157,7 @@ export const navItems = [
     href: "/admin",
     children: [{ label: "Master Settings", href: "/master-settings" }],
   },
-  { label: "Reports", icon: IconChartBar, href: "/reports" },
+  { label: "Reports", icon: IconChartBar, href: "/application/reports" },
 ];
 
 export const catalogueItems = [

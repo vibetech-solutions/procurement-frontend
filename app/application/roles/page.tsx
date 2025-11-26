@@ -5,7 +5,6 @@ import {
   Container,
   Title,
   Table,
-  Button,
   Group,
   ActionIcon,
   Text,
@@ -15,11 +14,7 @@ import {
   Card,
   Flex,
 } from "@mantine/core";
-import {
-  IconPlus,
-  IconSearch,
-  IconEye,
-} from "@tabler/icons-react";
+import { IconSearch, IconEye } from "@tabler/icons-react";
 import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { fetchRoles } from "@/lib/redux/features/merchants/merchantSlice";
@@ -62,14 +57,6 @@ export default function RolesPage() {
               Manage user roles and permissions for your organization
             </Text>
           </div>
-          <Button
-            component={Link}
-            href="/application/roles/new"
-            leftSection={<IconPlus size={16} />}
-            size="sm"
-          >
-            Add Role
-          </Button>
         </Flex>
 
         {/* Filters */}
