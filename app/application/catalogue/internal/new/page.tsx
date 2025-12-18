@@ -20,14 +20,14 @@ import {
   Tabs,
   Loader,
 } from "@mantine/core";
-import { RichTextEditor } from '@mantine/tiptap';
-import { useEditor } from '@tiptap/react';
-import Highlight from '@tiptap/extension-highlight';
-import StarterKit from '@tiptap/starter-kit';
-import Underline from '@tiptap/extension-underline';
-import TextAlign from '@tiptap/extension-text-align';
-import Superscript from '@tiptap/extension-superscript';
-import SubScript from '@tiptap/extension-subscript';
+import { RichTextEditor } from "@mantine/tiptap";
+import { useEditor } from "@tiptap/react";
+import Highlight from "@tiptap/extension-highlight";
+import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
+import TextAlign from "@tiptap/extension-text-align";
+import Superscript from "@tiptap/extension-superscript";
+import SubScript from "@tiptap/extension-subscript";
 import {
   IconArrowLeft,
   IconDeviceFloppy,
@@ -36,12 +36,15 @@ import {
   IconPackage,
   IconPlane,
 } from "@tabler/icons-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import CategoriesSelect from "@/components/shared/catalogue/products/categories-select";
 
 export default function NewInternalCatalogItem() {
   const router = useRouter();
-  const [itemType, setItemType] = useState<string | null>('inventory');
+  const searchParams = useSearchParams();
+  const type = searchParams.get("type");
+  const [itemType, setItemType] = useState<string | null>(type);
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -63,12 +66,12 @@ export default function NewInternalCatalogItem() {
       Superscript,
       SubScript,
       Highlight,
-      TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
     ],
-    content: formData.specifications || '<p></p>',
+    content: formData.specifications || "<p></p>",
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
-      setFormData(prev => ({ ...prev, specifications: editor.getHTML() }));
+      setFormData((prev) => ({ ...prev, specifications: editor.getHTML() }));
     },
   });
 
@@ -79,12 +82,12 @@ export default function NewInternalCatalogItem() {
       Superscript,
       SubScript,
       Highlight,
-      TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
     ],
-    content: formData.serviceTerms || '<p></p>',
+    content: formData.serviceTerms || "<p></p>",
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
-      setFormData(prev => ({ ...prev, serviceTerms: editor.getHTML() }));
+      setFormData((prev) => ({ ...prev, serviceTerms: editor.getHTML() }));
     },
   });
 
@@ -169,49 +172,21 @@ export default function NewInternalCatalogItem() {
                         }
                         required
                       />
-                      <Grid gutter="md">
-                        <Grid.Col span={6}>
-                          <Select
-                            label="Category"
-                            placeholder="Select category"
-                            data={[
-                              "Office Supplies",
-                              "IT Equipment",
-                              "Furniture",
-                              "Marketing Materials",
-                              "Safety Equipment",
-                            ]}
-                            value={formData.category}
-                            onChange={(value) =>
-                              setFormData({ ...formData, category: value || "" })
-                            }
-                            required
-                          />
-                        </Grid.Col>
-                        <Grid.Col span={6}>
-                          <NumberInput
-                            label="Price (KES)"
-                            placeholder="0"
-                            value={formData.price}
-                            onChange={(value) =>
-                              setFormData({
-                                ...formData,
-                                price: typeof value === "number" ? value : 0,
-                              })
-                            }
-                            min={0}
-                            prefix="KES "
-                            thousandSeparator=","
-                            required
-                          />
-                        </Grid.Col>
-                      </Grid>
+
+                      <CategoriesSelect
+                        formData={formData}
+                        setFormData={setFormData}
+                      />
+
                       <Textarea
                         label="Description"
                         placeholder="Detailed description of the item..."
                         value={formData.description}
                         onChange={(e) =>
-                          setFormData({ ...formData, description: e.target.value })
+                          setFormData({
+                            ...formData,
+                            description: e.target.value,
+                          })
                         }
                         rows={4}
                         required
@@ -223,7 +198,9 @@ export default function NewInternalCatalogItem() {
                         {!editor ? (
                           <Group justify="center" p="xl">
                             <Loader size="sm" />
-                            <Text size="sm" c="dimmed">Loading editor...</Text>
+                            <Text size="sm" c="dimmed">
+                              Loading editor...
+                            </Text>
                           </Group>
                         ) : (
                           <RichTextEditor editor={editor}>
@@ -268,7 +245,11 @@ export default function NewInternalCatalogItem() {
 
                               <RichTextEditor.ControlsGroup>
                                 <RichTextEditor.Control
-                                  onClick={() => document.getElementById('attachment-input')?.click()}
+                                  onClick={() =>
+                                    document
+                                      .getElementById("attachment-input")
+                                      ?.click()
+                                  }
                                   aria-label="Insert attachment"
                                   title="Insert attachment"
                                 >
@@ -277,35 +258,49 @@ export default function NewInternalCatalogItem() {
                               </RichTextEditor.ControlsGroup>
                             </RichTextEditor.Toolbar>
 
-                            <RichTextEditor.Content style={{ minHeight: '200px' }} />
+                            <RichTextEditor.Content
+                              style={{ minHeight: "200px" }}
+                            />
                           </RichTextEditor>
                         )}
                         <FileInput
                           id="attachment-input"
-                          style={{ display: 'none' }}
+                          style={{ display: "none" }}
                           multiple
                           onChange={(files) => {
                             if (files) {
                               setAttachments([...attachments, ...files]);
-                              files.forEach(file => {
-                                const link = `<p><a href="#" data-file="${file.name}">${file.name}</a> (${(file.size / 1024).toFixed(1)} KB)</p>`;
+                              files.forEach((file) => {
+                                const link = `<p><a href="#" data-file="${
+                                  file.name
+                                }">${file.name}</a> (${(
+                                  file.size / 1024
+                                ).toFixed(1)} KB)</p>`;
                                 editor?.commands.insertContent(link);
                               });
                             }
                           }}
                         />
                         {attachments.length > 0 && (
-                          <div style={{ marginTop: '8px' }}>
-                            <Text size="xs" c="dimmed">Attachments ({attachments.length}):</Text>
+                          <div style={{ marginTop: "8px" }}>
+                            <Text size="xs" c="dimmed">
+                              Attachments ({attachments.length}):
+                            </Text>
                             {attachments.map((file, index) => (
                               <Group key={index} gap="xs" mt="xs">
                                 <Text size="xs">{file.name}</Text>
-                                <Text size="xs" c="dimmed">({(file.size / 1024).toFixed(1)} KB)</Text>
+                                <Text size="xs" c="dimmed">
+                                  ({(file.size / 1024).toFixed(1)} KB)
+                                </Text>
                                 <ActionIcon
                                   size="xs"
                                   color="red"
                                   variant="subtle"
-                                  onClick={() => setAttachments(attachments.filter((_, i) => i !== index))}
+                                  onClick={() =>
+                                    setAttachments(
+                                      attachments.filter((_, i) => i !== index)
+                                    )
+                                  }
                                 >
                                   <IconX size={12} />
                                 </ActionIcon>
@@ -480,7 +475,10 @@ export default function NewInternalCatalogItem() {
                             ]}
                             value={formData.category}
                             onChange={(value) =>
-                              setFormData({ ...formData, category: value || "" })
+                              setFormData({
+                                ...formData,
+                                category: value || "",
+                              })
                             }
                             required
                           />
@@ -508,7 +506,10 @@ export default function NewInternalCatalogItem() {
                         placeholder="Detailed description of the service offered..."
                         value={formData.description}
                         onChange={(e) =>
-                          setFormData({ ...formData, description: e.target.value })
+                          setFormData({
+                            ...formData,
+                            description: e.target.value,
+                          })
                         }
                         rows={4}
                         required
@@ -520,7 +521,9 @@ export default function NewInternalCatalogItem() {
                         {!serviceTermsEditor ? (
                           <Group justify="center" p="xl">
                             <Loader size="sm" />
-                            <Text size="sm" c="dimmed">Loading editor...</Text>
+                            <Text size="sm" c="dimmed">
+                              Loading editor...
+                            </Text>
                           </Group>
                         ) : (
                           <RichTextEditor editor={serviceTermsEditor}>
@@ -565,7 +568,13 @@ export default function NewInternalCatalogItem() {
 
                               <RichTextEditor.ControlsGroup>
                                 <RichTextEditor.Control
-                                  onClick={() => document.getElementById('service-attachment-input')?.click()}
+                                  onClick={() =>
+                                    document
+                                      .getElementById(
+                                        "service-attachment-input"
+                                      )
+                                      ?.click()
+                                  }
                                   aria-label="Insert attachment"
                                   title="Insert attachment"
                                 >
@@ -574,35 +583,56 @@ export default function NewInternalCatalogItem() {
                               </RichTextEditor.ControlsGroup>
                             </RichTextEditor.Toolbar>
 
-                            <RichTextEditor.Content style={{ minHeight: '150px' }} />
+                            <RichTextEditor.Content
+                              style={{ minHeight: "150px" }}
+                            />
                           </RichTextEditor>
                         )}
                         <FileInput
                           id="service-attachment-input"
-                          style={{ display: 'none' }}
+                          style={{ display: "none" }}
                           multiple
                           onChange={(files) => {
                             if (files) {
-                              setServiceAttachments([...serviceAttachments, ...files]);
-                              files.forEach(file => {
-                                const link = `<p><a href="#" data-file="${file.name}">${file.name}</a> (${(file.size / 1024).toFixed(1)} KB)</p>`;
-                                serviceTermsEditor?.commands.insertContent(link);
+                              setServiceAttachments([
+                                ...serviceAttachments,
+                                ...files,
+                              ]);
+                              files.forEach((file) => {
+                                const link = `<p><a href="#" data-file="${
+                                  file.name
+                                }">${file.name}</a> (${(
+                                  file.size / 1024
+                                ).toFixed(1)} KB)</p>`;
+                                serviceTermsEditor?.commands.insertContent(
+                                  link
+                                );
                               });
                             }
                           }}
                         />
                         {serviceAttachments.length > 0 && (
-                          <div style={{ marginTop: '8px' }}>
-                            <Text size="xs" c="dimmed">Attachments ({serviceAttachments.length}):</Text>
+                          <div style={{ marginTop: "8px" }}>
+                            <Text size="xs" c="dimmed">
+                              Attachments ({serviceAttachments.length}):
+                            </Text>
                             {serviceAttachments.map((file, index) => (
                               <Group key={index} gap="xs" mt="xs">
                                 <Text size="xs">{file.name}</Text>
-                                <Text size="xs" c="dimmed">({(file.size / 1024).toFixed(1)} KB)</Text>
+                                <Text size="xs" c="dimmed">
+                                  ({(file.size / 1024).toFixed(1)} KB)
+                                </Text>
                                 <ActionIcon
                                   size="xs"
                                   color="red"
                                   variant="subtle"
-                                  onClick={() => setServiceAttachments(serviceAttachments.filter((_, i) => i !== index))}
+                                  onClick={() =>
+                                    setServiceAttachments(
+                                      serviceAttachments.filter(
+                                        (_, i) => i !== index
+                                      )
+                                    )
+                                  }
                                 >
                                   <IconX size={12} />
                                 </ActionIcon>
@@ -611,25 +641,44 @@ export default function NewInternalCatalogItem() {
                           </div>
                         )}
                       </div>
-                      
+
                       {/* Category-specific fields for services */}
-                      {formData.category === 'Travel' && (
+                      {formData.category === "Travel" && (
                         <Grid gutter="md">
-                          <Grid.Col span={12}><Text size="sm" fw={500} c="blue">Travel Details</Text></Grid.Col>
-                          <Grid.Col span={6}>
-                            <Select label="Travel Type" data={['Domestic', 'International', 'Multi-city']} />
+                          <Grid.Col span={12}>
+                            <Text size="sm" fw={500} c="blue">
+                              Travel Details
+                            </Text>
                           </Grid.Col>
                           <Grid.Col span={6}>
-                            <TextInput label="Destination" placeholder="City, Country" />
+                            <Select
+                              label="Travel Type"
+                              data={["Domestic", "International", "Multi-city"]}
+                            />
+                          </Grid.Col>
+                          <Grid.Col span={6}>
+                            <TextInput
+                              label="Destination"
+                              placeholder="City, Country"
+                            />
                           </Grid.Col>
                           <Grid.Col span={6}>
                             <TextInput label="Travel Date" type="date" />
                           </Grid.Col>
                           <Grid.Col span={6}>
-                            <NumberInput label="Number of Travelers" min={1} max={20} defaultValue={1} />
+                            <NumberInput
+                              label="Number of Travelers"
+                              min={1}
+                              max={20}
+                              defaultValue={1}
+                            />
                           </Grid.Col>
                           <Grid.Col span={12}>
-                            <Textarea label="Travel Purpose" placeholder="Business meeting, conference, training, etc." rows={2} />
+                            <Textarea
+                              label="Travel Purpose"
+                              placeholder="Business meeting, conference, training, etc."
+                              rows={2}
+                            />
                           </Grid.Col>
                         </Grid>
                       )}

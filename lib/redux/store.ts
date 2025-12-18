@@ -1,12 +1,16 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./features/auth/authSlice";
 import merchantsReducer from "./features/merchants/merchantSlice";
+import productsReducer from "./features/products/productsSlice";
+import productCategoriesReducer from "./features/products/categories/categoriesSlice";
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
       auth: authReducer,
       merchants: merchantsReducer,
+      products: productsReducer,
+      product_categories: productCategoriesReducer,
     },
   });
 };
