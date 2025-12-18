@@ -17,7 +17,6 @@ import {
   NumberInput,
   Tabs,
   Table,
-  ActionIcon,
   Badge,
 } from "@mantine/core";
 import { useEditor } from "@tiptap/react";
@@ -31,9 +30,7 @@ import {
   IconSettings,
   IconCurrencyDollar,
   IconCategory,
-  IconTrash,
   IconPlus,
-  IconEdit,
 } from "@tabler/icons-react";
 import { useState } from "react";
 import { useAppDispatch } from "@/lib/redux/hooks";
@@ -244,7 +241,7 @@ export default function MasterSettingsPage() {
                           </Badge>
                         </Table.Td>
                         <Table.Td>
-                          <Group gap="xs">
+                          {/* <Group gap="xs">
                             <ActionIcon variant="subtle" color="blue">
                               <IconEdit size={16} />
                             </ActionIcon>
@@ -255,7 +252,7 @@ export default function MasterSettingsPage() {
                             >
                               <IconTrash size={16} />
                             </ActionIcon>
-                          </Group>
+                          </Group> */}
                         </Table.Td>
                       </Table.Tr>
                     ))}
