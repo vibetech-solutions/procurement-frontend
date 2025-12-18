@@ -1,1 +1,20 @@
-export type Product = {};
+export type Product = {
+  id: number;
+  name: string;
+  category_id: number;
+  base_price: number;
+  description: string;
+  specifications: string;
+  image?: string;
+  created_at?: string;
+  updated_at?: string;
+  created_by?: number;
+  product_code?: string;
+  suppliers: User[];
+  category: Category;
+  opening_stock: number;
+  min_stock: number;
+  max_stock: number;
+  current_stock: number;
+  stock_status: 'in_stock' | 'low_stock' | 'out_of_stock' | 'overstock';
+};

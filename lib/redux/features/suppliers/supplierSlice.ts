@@ -20,7 +20,6 @@ const initialState: SuppliersState = {
 export const fetchSuppliers = createAsyncThunk(
   "products/fetchSuppliers",
   async (page: number = 1) => {
-    console.log("SAPLAYAS");
     await clientaxiosinstance.get("/sanctum/csrf-cookie");
     const response = await clientaxiosinstance.get(`/suppliers?page=${page}`);
     return response.data;

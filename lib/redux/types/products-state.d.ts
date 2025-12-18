@@ -7,4 +7,9 @@ export type ProductsState = {
   product: Product;
   productLoading: boolean;
   productError: string | null;
+  pagination: {
+    currentPage: number;
+    total: number;
+    last_page: number;
+  };
 };

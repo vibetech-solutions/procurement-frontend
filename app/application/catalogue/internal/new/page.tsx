@@ -24,7 +24,7 @@ import { RichTextEditor } from "@mantine/tiptap";
 import { useEditor } from "@tiptap/react";
 import Highlight from "@tiptap/extension-highlight";
 import StarterKit from "@tiptap/starter-kit";
-import Underline from "@tiptap/extension-underline";
+
 import TextAlign from "@tiptap/extension-text-align";
 import Superscript from "@tiptap/extension-superscript";
 import SubScript from "@tiptap/extension-subscript";
@@ -41,6 +41,9 @@ import { useEffect, useState } from "react";
 import CategoriesSelect from "@/components/shared/catalogue/products/categories-select";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { fetchSuppliers } from "@/lib/redux/features/suppliers/supplierSlice";
+import TaxDetails from "@/components/shared/catalogue/products/tax-details";
+import { addProduct } from "@/lib/redux/features/products/productsSlice";
+import { notifications } from "@mantine/notifications";
 
 export default function NewInternalCatalogItem() {
   const router = useRouter();
@@ -49,23 +52,27 @@ export default function NewInternalCatalogItem() {
   const type = searchParams.get("type");
   const [itemType, setItemType] = useState<string | null>(type);
   const [formData, setFormData] = useState({
-    name: "",
-    category: "",
+    product_name: "",
+    category_id: "",
+    categories: [] as string[],
     suppliers: [] as string[],
-    price: 0,
+    base_price: 0,
     description: "",
     specifications: "",
     serviceTerms: "",
-    taxStatus: "taxable",
-    taxType: "inclusive",
-    taxMethod: "percentage",
-    taxValue: 16,
+    tax_status: "taxable",
+    tax_type: "inclusive",
+    tax_method: "percentage",
+    tax_value_type: "percentage",
+    tax_value: 16,
+    opening_stock: 0,
+    min_stock: 0,
+    max_stock: 0,
   });
 
   const editor = useEditor({
     extensions: [
       StarterKit,
-      Underline,
       Superscript,
       SubScript,
       Highlight,
@@ -81,7 +88,6 @@ export default function NewInternalCatalogItem() {
   const serviceTermsEditor = useEditor({
     extensions: [
       StarterKit,
-      Underline,
       Superscript,
       SubScript,
       Highlight,
@@ -98,6 +104,7 @@ export default function NewInternalCatalogItem() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [serviceAttachments, setServiceAttachments] = useState<File[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { suppliers } = useAppSelector((state) => state.suppliers);
 
@@ -116,8 +123,71 @@ export default function NewInternalCatalogItem() {
     }
   };
 
-  const handleSubmit = () => {
-    console.log("Form data submitted:", formData);
+  const handleSubmit = async () => {
+    if (isLoading) return;
+
+    setIsLoading(true);
+    try {
+      const submitData = new FormData();
+
+      Object.entries(formData).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          value.forEach((item, index) => {
+            submitData.append(`${key}[${index}]`, item);
+          });
+        } else if (
+          [
+            "base_price",
+            "tax_value",
+            "opening_stock",
+            "min_stock",
+            "max_stock",
+          ].includes(key)
+        ) {
+          submitData.append(key, value.toString());
+        } else {
+          submitData.append(key, value.toString());
+        }
+      });
+
+      if (imageFile) {
+        submitData.append("image", imageFile);
+      }
+
+      await dispatch(addProduct(submitData)).unwrap();
+      notifications.show({
+        title: "Success",
+        message: "Product created successfully",
+        color: "green",
+      });
+      router.push("/application/catalogue/internal");
+    } catch (error: unknown) {
+      let errorMessage = "Failed to create product";
+
+      if (error && typeof error === "object" && "response" in error) {
+        const errorResponse = error.response as {
+          data?: { errors?: Record<string, string[]>; message?: string };
+        };
+        if (errorResponse.data?.errors) {
+          const validationErrors = Object.values(errorResponse.data.errors)
+            .flat()
+            .join(". ");
+          errorMessage = validationErrors;
+        } else if (errorResponse.data?.message) {
+          errorMessage = errorResponse.data.message;
+        }
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      notifications.show({
+        title: "Validation Error",
+        message: errorMessage,
+        color: "red",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -144,10 +214,18 @@ export default function NewInternalCatalogItem() {
               Cancel
             </Button>
             <Button
-              leftSection={<IconDeviceFloppy size={16} />}
+              leftSection={
+                isLoading ? (
+                  <Loader size={16} />
+                ) : (
+                  <IconDeviceFloppy size={16} />
+                )
+              }
               onClick={handleSubmit}
+              loading={isLoading}
+              disabled={isLoading}
             >
-              Save Item
+              {isLoading ? "Saving..." : "Save Item"}
             </Button>
           </Group>
         </Group>
@@ -174,11 +252,15 @@ export default function NewInternalCatalogItem() {
                       <TextInput
                         label="Product Name"
                         placeholder="e.g., Ergonomic Office Chair"
-                        value={formData.name}
+                        value={formData.product_name}
                         onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
+                          setFormData({
+                            ...formData,
+                            product_name: e.target.value,
+                          })
                         }
                         required
+                        maxLength={125}
                       />
 
                       <CategoriesSelect
@@ -198,6 +280,7 @@ export default function NewInternalCatalogItem() {
                         }
                         rows={4}
                         required
+                        maxLength={255}
                       />
                       <div>
                         <Text size="sm" fw={500} mb="xs">
@@ -388,6 +471,7 @@ export default function NewInternalCatalogItem() {
                         accept="image/*"
                         value={imageFile}
                         onChange={handleImageUpload}
+                        required
                       />
                       <Text size="xs" c="dimmed">
                         Recommended: 400x400px, max 2MB
@@ -397,59 +481,53 @@ export default function NewInternalCatalogItem() {
 
                   <Card shadow="sm" padding="lg" radius="md" withBorder>
                     <Title order={4} mb="md">
-                      Tax Details
+                      Stock Details
                     </Title>
                     <Stack gap="md">
-                      <Select
-                        label="Tax Status"
-                        value={formData.taxStatus}
+                      <NumberInput
+                        label="Opening Stock"
+                        placeholder="0"
+                        value={formData.opening_stock}
                         onChange={(value) =>
                           setFormData({
                             ...formData,
-                            taxStatus: value || "taxable",
+                            opening_stock:
+                              typeof value === "number" ? value : 0,
                           })
                         }
-                        data={[
-                          { value: "taxable", label: "Taxable" },
-                          { value: "exempt", label: "Tax Exempt" },
-                        ]}
+                        min={0}
+                        required
                       />
-                      {formData.taxStatus === "taxable" && (
-                        <>
-                          <Select
-                            label="Tax Type"
-                            value={formData.taxType}
-                            onChange={(value) =>
-                              setFormData({
-                                ...formData,
-                                taxType: value || "inclusive",
-                              })
-                            }
-                            data={[
-                              { value: "inclusive", label: "Inclusive" },
-                              { value: "exclusive", label: "Exclusive" },
-                            ]}
-                          />
-                          <NumberInput
-                            label="Tax Percentage (%)"
-                            value={formData.taxValue}
-                            onChange={(value) =>
-                              setFormData({
-                                ...formData,
-                                taxValue: typeof value === "number" ? value : 0,
-                              })
-                            }
-                            min={0}
-                            max={100}
-                            suffix="%"
-                          />
-                        </>
-                      )}
-                      <Text size="xs" c="dimmed">
-                        Standard VAT rate in Kenya is 16%
-                      </Text>
+                      <NumberInput
+                        label="Minimum Value"
+                        placeholder="0"
+                        value={formData.min_stock}
+                        onChange={(value) =>
+                          setFormData({
+                            ...formData,
+                            min_stock: typeof value === "number" ? value : 0,
+                          })
+                        }
+                        min={0}
+                        required
+                      />
+                      <NumberInput
+                        label="Maximum Value"
+                        placeholder="0"
+                        value={formData.max_stock}
+                        onChange={(value) =>
+                          setFormData({
+                            ...formData,
+                            max_stock: typeof value === "number" ? value : 0,
+                          })
+                        }
+                        min={0}
+                        required
+                      />
                     </Stack>
                   </Card>
+
+                  <TaxDetails formData={formData} setFormData={setFormData} />
                 </Stack>
               </Grid.Col>
             </Grid>
@@ -467,9 +545,12 @@ export default function NewInternalCatalogItem() {
                       <TextInput
                         label="Service Name"
                         placeholder="e.g., Flight Booking Service"
-                        value={formData.name}
+                        value={formData.product_name}
                         onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
+                          setFormData({
+                            ...formData,
+                            product_name: e.target.value,
+                          })
                         }
                         required
                       />
@@ -486,11 +567,11 @@ export default function NewInternalCatalogItem() {
                               "Training",
                               "Marketing",
                             ]}
-                            value={formData.category}
+                            value={formData.category_id}
                             onChange={(value) =>
                               setFormData({
                                 ...formData,
-                                category: value || "",
+                                category_id: value || "",
                               })
                             }
                             required
@@ -500,11 +581,12 @@ export default function NewInternalCatalogItem() {
                           <NumberInput
                             label="Base Price (KES)"
                             placeholder="0"
-                            value={formData.price}
+                            value={formData.base_price}
                             onChange={(value) =>
                               setFormData({
                                 ...formData,
-                                price: typeof value === "number" ? value : 0,
+                                base_price:
+                                  typeof value === "number" ? value : 0,
                               })
                             }
                             min={0}
@@ -656,7 +738,7 @@ export default function NewInternalCatalogItem() {
                       </div>
 
                       {/* Category-specific fields for services */}
-                      {formData.category === "Travel" && (
+                      {formData.category_id === "Travel" && (
                         <Grid gutter="md">
                           <Grid.Col span={12}>
                             <Text size="sm" fw={500} c="blue">
@@ -725,65 +807,7 @@ export default function NewInternalCatalogItem() {
                 </Stack>
               </Grid.Col>
 
-              <Grid.Col span={{ base: 12, md: 4 }}>
-                <Stack gap="md">
-                  <Card shadow="sm" padding="lg" radius="md" withBorder>
-                    <Title order={4} mb="md">
-                      Tax Details
-                    </Title>
-                    <Stack gap="md">
-                      <Select
-                        label="Tax Status"
-                        value={formData.taxStatus}
-                        onChange={(value) =>
-                          setFormData({
-                            ...formData,
-                            taxStatus: value || "exempt",
-                          })
-                        }
-                        data={[
-                          { value: "exempt", label: "Tax Exempt" },
-                          { value: "taxable", label: "Taxable" },
-                        ]}
-                      />
-                      {formData.taxStatus === "taxable" && (
-                        <>
-                          <Select
-                            label="Tax Type"
-                            value={formData.taxType}
-                            onChange={(value) =>
-                              setFormData({
-                                ...formData,
-                                taxType: value || "inclusive",
-                              })
-                            }
-                            data={[
-                              { value: "inclusive", label: "Inclusive" },
-                              { value: "exclusive", label: "Exclusive" },
-                            ]}
-                          />
-                          <NumberInput
-                            label="Tax Percentage (%)"
-                            value={formData.taxValue}
-                            onChange={(value) =>
-                              setFormData({
-                                ...formData,
-                                taxValue: typeof value === "number" ? value : 0,
-                              })
-                            }
-                            min={0}
-                            max={100}
-                            suffix="%"
-                          />
-                        </>
-                      )}
-                      <Text size="xs" c="dimmed">
-                        Most services are tax-exempt in Kenya
-                      </Text>
-                    </Stack>
-                  </Card>
-                </Stack>
-              </Grid.Col>
+              <TaxDetails formData={formData} setFormData={setFormData} />
             </Grid>
           </Tabs.Panel>
         </Tabs>

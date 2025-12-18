@@ -1,3 +1,10 @@
+import {
+  IconAlertTriangle,
+  IconBoxOff,
+  IconCircleCheck,
+  IconTrendingUp,
+} from "@tabler/icons-react";
+
 export const getStatusColor = (status: string) => {
   switch (status) {
     case "Approved":
@@ -112,4 +119,34 @@ export function getRoleColor(role: string) {
 export const mapDateFormat = (format: string | undefined) => {
   if (!format) return "dd/MM/yyyy";
   return format.replace("DD", "dd").replace("MM", "MM").replace("YYYY", "yyyy");
+};
+
+export const getStockStatusConfig = (status: string) => {
+  switch (status) {
+    case "out_of_stock":
+      return {
+        label: "Out of Stock",
+        color: "red",
+        icon: IconBoxOff,
+      };
+    case "low_stock":
+      return {
+        label: "Low Stock",
+        color: "orange",
+        icon: IconAlertTriangle,
+      };
+    case "overstock":
+      return {
+        label: "Overstock",
+        color: "yellow",
+        icon: IconTrendingUp,
+      };
+    case "in_stock":
+    default:
+      return {
+        label: "In Stock",
+        color: "green",
+        icon: IconCircleCheck,
+      };
+  }
 };

@@ -7,17 +7,22 @@ import { Grid, NumberInput, Select } from "@mantine/core";
 import React, { useEffect, SetStateAction, Dispatch } from "react";
 
 interface FormData {
-  name: string;
-  category: string;
+  product_name: string;
+  category_id: string;
+  categories: string[];
   suppliers: string[];
-  price: number;
+  base_price: number;
   description: string;
   specifications: string;
   serviceTerms: string;
-  taxStatus: string;
-  taxType: string;
-  taxMethod: string;
-  taxValue: number;
+  tax_status: string;
+  tax_type: string;
+  tax_method: string;
+  tax_value_type: string;
+  tax_value: number;
+  opening_stock: number;
+  min_stock: number;
+  max_stock: number;
 }
 
 interface CategoriesSelectProps {
@@ -43,11 +48,11 @@ const CategoriesSelect = ({ formData, setFormData }: CategoriesSelectProps) => {
             value: category.id.toString(),
             label: category.name,
           }))}
-          value={formData.category}
+          value={formData.category_id}
           onChange={(value) =>
             setFormData({
               ...formData,
-              category: value || "",
+              category_id: value || "",
             })
           }
           searchable
@@ -65,11 +70,11 @@ const CategoriesSelect = ({ formData, setFormData }: CategoriesSelectProps) => {
         <NumberInput
           label="Price (KES)"
           placeholder="0"
-          value={formData.price}
+          value={formData.base_price}
           onChange={(value) =>
             setFormData({
               ...formData,
-              price: typeof value === "number" ? value : 0,
+              base_price: typeof value === "number" ? value : 0,
             })
           }
           min={0}
