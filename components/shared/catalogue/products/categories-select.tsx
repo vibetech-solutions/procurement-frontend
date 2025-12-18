@@ -4,17 +4,25 @@ import {
 } from "@/lib/redux/features/products/categories/categoriesSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { Grid, NumberInput, Select } from "@mantine/core";
-import React, { useEffect } from "react";
+import React, { useEffect, SetStateAction, Dispatch } from "react";
 
 interface FormData {
+  name: string;
   category: string;
+  suppliers: string[];
   price: number;
-  [key: string]: any;
+  description: string;
+  specifications: string;
+  serviceTerms: string;
+  taxStatus: string;
+  taxType: string;
+  taxMethod: string;
+  taxValue: number;
 }
 
 interface CategoriesSelectProps {
   formData: FormData;
-  setFormData: (data: FormData) => void;
+  setFormData: Dispatch<SetStateAction<FormData>>;
 }
 
 const CategoriesSelect = ({ formData, setFormData }: CategoriesSelectProps) => {

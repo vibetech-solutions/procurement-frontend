@@ -37,11 +37,14 @@ import {
   IconPlane,
 } from "@tabler/icons-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CategoriesSelect from "@/components/shared/catalogue/products/categories-select";
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import { fetchSuppliers } from "@/lib/redux/features/suppliers/supplierSlice";
 
 export default function NewInternalCatalogItem() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
   const [itemType, setItemType] = useState<string | null>(type);
@@ -96,6 +99,12 @@ export default function NewInternalCatalogItem() {
   const [attachments, setAttachments] = useState<File[]>([]);
   const [serviceAttachments, setServiceAttachments] = useState<File[]>([]);
 
+  const { suppliers } = useAppSelector((state) => state.suppliers);
+
+  useEffect(() => {
+    dispatch(fetchSuppliers(1));
+  }, [dispatch]);
+
   const handleImageUpload = (file: File | null) => {
     setImageFile(file);
     if (file) {
@@ -107,13 +116,9 @@ export default function NewInternalCatalogItem() {
     }
   };
 
-  const suppliers = [
-    "Office Pro Ltd",
-    "Tech Solutions Inc",
-    "Supplies Direct",
-    "Kenya Stationery Ltd",
-    "Digital Solutions Kenya",
-  ];
+  const handleSubmit = () => {
+    console.log("Form data submitted:", formData);
+  };
 
   return (
     <ContentContainer>
@@ -138,7 +143,10 @@ export default function NewInternalCatalogItem() {
             <Button variant="outline" onClick={() => router.back()}>
               Cancel
             </Button>
-            <Button leftSection={<IconDeviceFloppy size={16} />}>
+            <Button
+              leftSection={<IconDeviceFloppy size={16} />}
+              onClick={handleSubmit}
+            >
               Save Item
             </Button>
           </Group>
@@ -320,7 +328,12 @@ export default function NewInternalCatalogItem() {
                       <MultiSelect
                         label="Select Suppliers"
                         placeholder="Choose one or more suppliers"
-                        data={suppliers}
+                        data={suppliers.map((supplier) => ({
+                          value: supplier.id.toString(),
+                          label:
+                            supplier.supplier_trading_name ??
+                            supplier.company_name,
+                        }))}
                         value={formData.suppliers}
                         onChange={(value) =>
                           setFormData({ ...formData, suppliers: value })

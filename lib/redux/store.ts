@@ -3,6 +3,7 @@ import authReducer from "./features/auth/authSlice";
 import merchantsReducer from "./features/merchants/merchantSlice";
 import productsReducer from "./features/products/productsSlice";
 import productCategoriesReducer from "./features/products/categories/categoriesSlice";
+import suppliersReducer from "./features/suppliers/supplierSlice";
 
 export const makeStore = () => {
   return configureStore({
@@ -11,6 +12,7 @@ export const makeStore = () => {
       merchants: merchantsReducer,
       products: productsReducer,
       product_categories: productCategoriesReducer,
+      suppliers: suppliersReducer,
     },
   });
 };

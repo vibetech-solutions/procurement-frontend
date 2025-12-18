@@ -25,7 +25,7 @@ const CategoriesTable = ({
   handleDeleteCategory: (category: Category) => void;
 }) => {
   const dispatch = useAppDispatch();
-  const { categories, categoriesLoading, categoriesError, pagination } = useAppSelector(
+  const { categories, categoriesLoading, pagination } = useAppSelector(
     (state) => state.product_categories
   );
   const [currentPage, setCurrentPage] = useState(1);

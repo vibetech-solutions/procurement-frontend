@@ -125,7 +125,7 @@ export default function MasterSettingsPage() {
       notifications.show({
         title: "Error",
         message:
-          (error as any)?.message ??
+          (error as Error)?.message ??
           "Failed to create category. Please try again.",
         color: "red",
       });

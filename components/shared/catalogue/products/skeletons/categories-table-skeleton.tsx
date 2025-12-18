@@ -1,4 +1,4 @@
-import { Card, Group, Skeleton, Stack, Table } from "@mantine/core";
+import { Card, Group, Skeleton, Table } from "@mantine/core";
 import React from "react";
 
 const CategoriesTableSkeleton = () => {
