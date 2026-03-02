@@ -12,9 +12,8 @@ export type Product = {
   product_code?: string;
   suppliers: User[];
   category: Category;
-  opening_stock: number;
   min_stock: number;
   max_stock: number;
   current_stock: number;
-  stock_status: 'in_stock' | 'low_stock' | 'out_of_stock' | 'overstock';
+  stock_status: "in_stock" | "low_stock" | "out_of_stock" | "overstock";
 };

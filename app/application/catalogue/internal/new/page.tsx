@@ -44,6 +44,8 @@ import { fetchSuppliers } from "@/lib/redux/features/suppliers/supplierSlice";
 import TaxDetails from "@/components/shared/catalogue/products/tax-details";
 import { addProduct } from "@/lib/redux/features/products/productsSlice";
 import { notifications } from "@mantine/notifications";
+import WarehousesMultiSelect from "@/components/shared/catalogue/warehouses/warehouses-multi-select";
+import { fetchCategories } from "@/lib/redux/features/products/categories/categoriesSlice";
 
 export default function NewInternalCatalogItem() {
   const router = useRouter();
@@ -68,6 +70,7 @@ export default function NewInternalCatalogItem() {
     opening_stock: 0,
     min_stock: 0,
     max_stock: 0,
+    warehouses: [] as string[],
   });
 
   const editor = useEditor({
@@ -107,9 +110,11 @@ export default function NewInternalCatalogItem() {
   const [isLoading, setIsLoading] = useState(false);
 
   const { suppliers } = useAppSelector((state) => state.suppliers);
+  const { categories } = useAppSelector((state) => state.product_categories);
 
   useEffect(() => {
     dispatch(fetchSuppliers(1));
+    dispatch(fetchCategories(1));
   }, [dispatch]);
 
   const handleImageUpload = (file: File | null) => {
@@ -136,13 +141,7 @@ export default function NewInternalCatalogItem() {
             submitData.append(`${key}[${index}]`, item);
           });
         } else if (
-          [
-            "base_price",
-            "tax_value",
-            "opening_stock",
-            "min_stock",
-            "max_stock",
-          ].includes(key)
+          ["base_price", "tax_value", "min_stock", "max_stock"].includes(key)
         ) {
           submitData.append(key, value.toString());
         } else {
@@ -162,19 +161,39 @@ export default function NewInternalCatalogItem() {
       });
       router.push("/application/catalogue/internal");
     } catch (error: unknown) {
+      console.log("Full error object:", error); // Debug log
       let errorMessage = "Failed to create product";
 
-      if (error && typeof error === "object" && "response" in error) {
-        const errorResponse = error.response as {
-          data?: { errors?: Record<string, string[]>; message?: string };
-        };
-        if (errorResponse.data?.errors) {
-          const validationErrors = Object.values(errorResponse.data.errors)
-            .flat()
-            .join(". ");
-          errorMessage = validationErrors;
-        } else if (errorResponse.data?.message) {
-          errorMessage = errorResponse.data.message;
+      if (error && typeof error === "object") {
+        // Handle Redux Toolkit error structure
+        if ("message" in error && typeof error.message === "string") {
+          try {
+            const parsedError = JSON.parse(error.message);
+            if (parsedError.errors) {
+              const validationErrors = Object.values(parsedError.errors)
+                .flat()
+                .join(". ");
+              errorMessage = validationErrors;
+            } else if (parsedError.message) {
+              errorMessage = parsedError.message;
+            }
+          } catch {
+            errorMessage = error.message;
+          }
+        }
+        // Handle direct response structure
+        else if ("response" in error) {
+          const errorResponse = error.response as {
+            data?: { errors?: Record<string, string[]>; message?: string };
+          };
+          if (errorResponse.data?.errors) {
+            const validationErrors = Object.values(errorResponse.data.errors)
+              .flat()
+              .join(". ");
+            errorMessage = validationErrors;
+          } else if (errorResponse.data?.message) {
+            errorMessage = errorResponse.data.message;
+          }
         }
       } else if (error instanceof Error) {
         errorMessage = error.message;
@@ -484,10 +503,14 @@ export default function NewInternalCatalogItem() {
                       Stock Details
                     </Title>
                     <Stack gap="md">
+                      <WarehousesMultiSelect
+                        formData={formData}
+                        setFormData={setFormData}
+                      />
                       <NumberInput
                         label="Opening Stock"
                         placeholder="0"
-                        value={formData.opening_stock}
+                        value={formData.opening_stock || 0}
                         onChange={(value) =>
                           setFormData({
                             ...formData,
@@ -556,26 +579,51 @@ export default function NewInternalCatalogItem() {
                       />
                       <Grid gutter="md">
                         <Grid.Col span={6}>
-                          <Select
-                            label="Category"
-                            placeholder="Select category"
-                            data={[
-                              "Travel",
-                              "Transport",
-                              "Professional Services",
-                              "Consulting",
-                              "Training",
-                              "Marketing",
-                            ]}
-                            value={formData.category_id}
-                            onChange={(value) =>
-                              setFormData({
-                                ...formData,
-                                category_id: value || "",
-                              })
-                            }
-                            required
-                          />
+                          <Group align="end" gap="xs">
+                            <div style={{ flex: 1 }}>
+                              <Select
+                                label="Category"
+                                placeholder="Select category"
+                                data={(categories || []).map((category) => ({
+                                  value: category.id.toString(),
+                                  label: category.name,
+                                }))}
+                                value={formData.category_id}
+                                onChange={(value) =>
+                                  setFormData({
+                                    ...formData,
+                                    category_id: value || "",
+                                  })
+                                }
+                                searchable
+                                required
+                              />
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                const categoryName = prompt(
+                                  "Enter category name:"
+                                );
+                                if (categoryName?.trim()) {
+                                  // For now, just add it locally - you can integrate with API later
+                                  const newId = Date.now().toString();
+                                  setFormData({
+                                    ...formData,
+                                    category_id: newId,
+                                  });
+                                  notifications.show({
+                                    title: "Category Created",
+                                    message: `Category "${categoryName}" created successfully`,
+                                    color: "green",
+                                  });
+                                }
+                              }}
+                            >
+                              +
+                            </Button>
+                          </Group>
                         </Grid.Col>
                         <Grid.Col span={6}>
                           <NumberInput

@@ -8,28 +8,45 @@ import {
 } from "@mantine/core";
 import React, { SetStateAction, Dispatch } from "react";
 
-interface FormData {
-  product_name: string;
-  category_id: string;
-  categories: string[];
-  suppliers: string[];
-  base_price: number;
-  description: string;
-  specifications: string;
-  serviceTerms: string;
-  tax_status: string;
-  tax_type: string;
-  tax_method: string;
-  tax_value_type: string;
-  tax_value: number;
-  opening_stock: number;
-  min_stock: number;
-  max_stock: number;
-}
-
 interface TaxDetailsProps {
-  formData: FormData;
-  setFormData: Dispatch<SetStateAction<FormData>>;
+  formData: {
+    tax_status: string;
+    tax_type: string;
+    tax_value_type: string;
+    tax_value: number;
+    product_name: string;
+    category_id: string;
+    categories: string[];
+    suppliers: string[];
+    base_price: number;
+    description: string;
+    specifications: string;
+    serviceTerms: string;
+    tax_method: string;
+    opening_stock: number;
+    min_stock: number;
+    max_stock: number;
+    warehouses: string[];
+  };
+  setFormData: Dispatch<SetStateAction<{
+    tax_status: string;
+    tax_type: string;
+    tax_value_type: string;
+    tax_value: number;
+    product_name: string;
+    category_id: string;
+    categories: string[];
+    suppliers: string[];
+    base_price: number;
+    description: string;
+    specifications: string;
+    serviceTerms: string;
+    tax_method: string;
+    opening_stock: number;
+    min_stock: number;
+    max_stock: number;
+    warehouses: string[];
+  }>>;
 }
 
 const TaxDetails = ({ formData, setFormData }: TaxDetailsProps) => {
