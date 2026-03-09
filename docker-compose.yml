@@ -1,25 +1,26 @@
+version: "3.9"
+
 services:
-  procurement-frontend-client:
+  procurement-frontend:
     build:
       context: .
-      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_BACKEND_API_URL: ${NEXT_PUBLIC_BACKEND_API_URL}
+        NEXT_PUBLIC_FRONTEND_URL: ${NEXT_PUBLIC_FRONTEND_URL}
     env_file:
-      - .env.production
-    volumes:
-      - procurement-frontend:/app/out
+      - .env
     networks:
-      - procurement-frontend
-  procurement-frontend-nginx:
-    build:
-      context: ./nginx
-    volumes:
-      - procurement-frontend:/app/out
+      - frontend
+
+  procurement-nginx:
+    build: ./nginx
     ports:
       - "3000:80"
-    networks:
+    depends_on:
       - procurement-frontend
+    networks:
+      - frontend
+
 networks:
-  procurement-frontend:
+  frontend:
     driver: bridge
-volumes:
-  procurement-frontend:

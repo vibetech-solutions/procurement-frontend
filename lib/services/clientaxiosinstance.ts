@@ -3,12 +3,12 @@ import axios from "axios";
 const clientaxiosinstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BACKEND_API_URL,
   withCredentials: true,
+  withXSRFToken: true,
   headers: {
     Accept: "application/json",
+    "Content-Type": "application/json",
     "X-Requested-With": "XMLHttpRequest",
   },
-  xsrfCookieName: "XSRF-TOKEN",
-  xsrfHeaderName: "X-XSRF-TOKEN",
 });
 
 export default clientaxiosinstance;
