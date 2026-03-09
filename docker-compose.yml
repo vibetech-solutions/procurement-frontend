@@ -1,0 +1,25 @@
+services:
+  procurement-frontend-client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env.production
+    volumes:
+      - procurement-frontend:/app/out
+    networks:
+      - procurement-frontend
+  procurement-frontend-nginx:
+    build:
+      context: ./nginx
+    volumes:
+      - procurement-frontend:/app/out
+    ports:
+      - "3000:80"
+    networks:
+      - procurement-frontend
+networks:
+  procurement-frontend:
+    driver: bridge
+volumes:
+  procurement-frontend:
