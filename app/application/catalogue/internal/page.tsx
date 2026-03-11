@@ -5,6 +5,7 @@ import ECommerceFilters from "@/components/shared/catalogue/internal/ecommerce-f
 import InternalCatalogPageHeader from "@/components/shared/catalogue/internal/page-hader";
 import InternalCatalogTabsHeader from "@/components/shared/catalogue/internal/tabs-header";
 import ProductsView from "@/components/shared/catalogue/products/view/products-view";
+import ServicesView from "@/components/shared/catalogue/services/services-view";
 import { getProducts } from "@/lib/redux/features/products/productsSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import {
@@ -96,6 +97,8 @@ export default function InternalCatalogPage() {
               pagination={pagination}
             />
           )}
+
+          {activeTab === "services" && <ServicesView />}
         </Grid>
 
         <Modal
