@@ -1,7 +1,13 @@
 "use client";
 
 import { ContentContainer } from "@/components/layout/content-container";
-import { catalogueCategories, catalogueItems, nonTangibleCatalogueItems, nonTangibleCategories } from "@/lib/utils/constants";
+import { getProducts } from "@/lib/redux/features/products/productsSlice";
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import {
+  catalogueCategories,
+  nonTangibleCatalogueItems,
+  nonTangibleCategories,
+} from "@/lib/utils/constants";
 import {
   TextInput,
   Select,
@@ -34,14 +40,24 @@ import {
   IconPlane,
 } from "@tabler/icons-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function SuppliersCatalogPage() {
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [activeTab, setActiveTab] = useState<string | null>('inventory');
-  
-  const currentItems = activeTab === 'inventory' ? catalogueItems : nonTangibleCatalogueItems;
-  const currentCategories = activeTab === 'inventory' ? catalogueCategories : nonTangibleCategories;
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [activeTab, setActiveTab] = useState<string | null>("inventory");
+
+  const dispatch = useAppDispatch();
+
+  const { products } = useAppSelector((state) => state.products);
+
+  useEffect(() => {
+    dispatch(getProducts({ page: 1 }));
+  }, [dispatch]);
+
+  const currentItems =
+    activeTab === "inventory" ? products : nonTangibleCatalogueItems;
+  const currentCategories =
+    activeTab === "inventory" ? catalogueCategories : nonTangibleCategories;
 
   return (
     <ContentContainer>
@@ -60,7 +76,7 @@ export default function SuppliersCatalogPage() {
         <Tabs value={activeTab} onChange={setActiveTab}>
           <Tabs.List>
             <Tabs.Tab value="inventory" leftSection={<IconGrid3x3 size={16} />}>
-              Products ({catalogueItems.length})
+              Products ({products.length})
             </Tabs.Tab>
             <Tabs.Tab value="services" leftSection={<IconPlane size={16} />}>
               Services ({nonTangibleCatalogueItems.length})
@@ -224,55 +240,83 @@ export default function SuppliersCatalogPage() {
                   Showing {currentItems.length} supplier items
                 </Text>
                 <Group gap="xs">
-                  <Button 
-                    variant={viewMode === 'grid' ? 'filled' : 'subtle'} 
+                  <Button
+                    variant={viewMode === "grid" ? "filled" : "subtle"}
                     size="xs"
                     leftSection={<IconGrid3x3 size={14} />}
-                    onClick={() => setViewMode('grid')}
+                    onClick={() => setViewMode("grid")}
                   >
                     Grid
                   </Button>
-                  <Button 
-                    variant={viewMode === 'list' ? 'filled' : 'subtle'} 
+                  <Button
+                    variant={viewMode === "list" ? "filled" : "subtle"}
                     size="xs"
                     leftSection={<IconList size={14} />}
-                    onClick={() => setViewMode('list')}
+                    onClick={() => setViewMode("list")}
                   >
                     List
                   </Button>
                 </Group>
               </Group>
 
-              {viewMode === 'grid' ? (
+              {viewMode === "grid" ? (
                 <Grid gutter="md">
                   {currentItems.map((item) => (
                     <Grid.Col key={item.id} span={{ base: 12, sm: 6, lg: 4 }}>
-                      <Card shadow="sm" padding="lg" radius="md" withBorder h="100%">
-                        {activeTab === 'inventory' ? (
+                      <Card
+                        shadow="sm"
+                        padding="lg"
+                        radius="md"
+                        withBorder
+                        h="100%"
+                      >
+                        {activeTab === "inventory" ? (
                           <Card.Section style={{ position: "relative" }}>
                             <Image
-                              src={('image' in item ? item.image : null) || "/placeholder.svg"}
+                              src={
+                                ("image" in item ? item.image : null) ||
+                                "/placeholder.svg"
+                              }
                               height={180}
                               alt={item.name}
                             />
-                            <Group gap="xs" style={{ position: "absolute", top: 8, right: 8 }}>
+                            <Group
+                              gap="xs"
+                              style={{ position: "absolute", top: 8, right: 8 }}
+                            >
                               <ActionIcon
                                 variant="filled"
                                 color="blue"
                                 size="sm"
                               >
-                                <Link href={`/application/catalogue/${item.id}`}>
+                                <Link
+                                  href={`/application/catalogue/${item.id}`}
+                                >
                                   <IconEye size={16} />
                                 </Link>
                               </ActionIcon>
                             </Group>
                           </Card.Section>
                         ) : (
-                          <Card.Section p="md" style={{ minHeight: 120, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#f8f9fa" }}>
-                            <Link href={`/application/cart/non-tangible/${item.id}`} style={{ textDecoration: "none" }}>
+                          <Card.Section
+                            p="md"
+                            style={{
+                              minHeight: 120,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              backgroundColor: "#f8f9fa",
+                            }}
+                          >
+                            <Link
+                              href={`/application/cart/non-tangible/${item.id}`}
+                              style={{ textDecoration: "none" }}
+                            >
                               <Group>
                                 <IconPlane size={32} color="#228be6" />
-                                <Text size="sm" c="blue" fw={500}>View service details</Text>
+                                <Text size="sm" c="blue" fw={500}>
+                                  View service details
+                                </Text>
                               </Group>
                             </Link>
                           </Card.Section>
@@ -280,23 +324,39 @@ export default function SuppliersCatalogPage() {
                         <Stack gap="xs" mt="md">
                           <Group justify="space-between" align="flex-start">
                             <div style={{ flex: 1 }}>
-                              <Text fw={600} size="sm" lineClamp={2}>{item.name}</Text>
-                              <Text size="xs" c="dimmed" mt={4}>{item.id}</Text>
+                              <Text fw={600} size="sm" lineClamp={2}>
+                                {item.name}
+                              </Text>
+                              <Text size="xs" c="dimmed" mt={4}>
+                                {item.id}
+                              </Text>
                             </div>
                             <ActionIcon variant="subtle" color="gray">
                               <IconHeart size={18} />
                             </ActionIcon>
                           </Group>
-                          <Badge size="sm" variant="light" color={item.inStock ? "green" : "red"}>
+                          <Badge
+                            size="sm"
+                            variant="light"
+                            color={item.inStock ? "green" : "red"}
+                          >
                             {item.inStock ? "Available" : "Out of Stock"}
                           </Badge>
-                          <Text size="xs" c="dimmed" lineClamp={2}>{item.description}</Text>
+                          <Text size="xs" c="dimmed" lineClamp={2}>
+                            {item.description}
+                          </Text>
                           <Group justify="space-between" mt="xs">
                             <div>
-                              <Text size="xs" c="dimmed">Supplier</Text>
-                              <Text size="xs" fw={500}>{item.supplier}</Text>
+                              <Text size="xs" c="dimmed">
+                                Supplier
+                              </Text>
+                              <Text size="xs" fw={500}>
+                                {item.supplier}
+                              </Text>
                             </div>
-                            <Text size="lg" fw={700} c="cyan">{item.price}</Text>
+                            <Text size="lg" fw={700} c="cyan">
+                              {item.price}
+                            </Text>
                           </Group>
                           <Button
                             leftSection={<IconShoppingCart size={16} />}
@@ -329,29 +389,48 @@ export default function SuppliersCatalogPage() {
                       <Table.Tr key={item.id}>
                         <Table.Td>
                           <div>
-                            <Text fw={500} size="sm">{item.name}</Text>
-                            <Text size="xs" c="dimmed">{item.id}</Text>
-                            <Text size="xs" c="dimmed" lineClamp={1}>{item.description}</Text>
+                            <Text fw={500} size="sm">
+                              {item.name}
+                            </Text>
+                            <Text size="xs" c="dimmed">
+                              {item.id}
+                            </Text>
+                            <Text size="xs" c="dimmed" lineClamp={1}>
+                              {item.description}
+                            </Text>
                           </div>
                         </Table.Td>
                         <Table.Td>
-                          <Badge variant="light" size="sm">{item.category}</Badge>
+                          <Badge variant="light" size="sm">
+                            {item.category}
+                          </Badge>
                         </Table.Td>
                         <Table.Td>
                           <Text size="sm">{item.supplier}</Text>
                         </Table.Td>
                         <Table.Td>
-                          <Text size="sm" fw={600} c="cyan">{item.price}</Text>
+                          <Text size="sm" fw={600} c="cyan">
+                            {item.price}
+                          </Text>
                         </Table.Td>
                         <Table.Td>
-                          <Badge variant="light" color={item.inStock ? "green" : "red"}>
+                          <Badge
+                            variant="light"
+                            color={item.inStock ? "green" : "red"}
+                          >
                             {item.inStock ? "Available" : "Out of Stock"}
                           </Badge>
                         </Table.Td>
                         <Table.Td>
                           <Group gap="xs">
                             <ActionIcon variant="subtle" color="blue">
-                              <Link href={activeTab === 'inventory' ? `/application/catalogue/${item.id}` : `/application/cart/non-tangible/${item.id}`}>
+                              <Link
+                                href={
+                                  activeTab === "inventory"
+                                    ? `/application/catalogue/${item.id}`
+                                    : `/application/cart/non-tangible/${item.id}`
+                                }
+                              >
                                 <IconEye size={16} />
                               </Link>
                             </ActionIcon>

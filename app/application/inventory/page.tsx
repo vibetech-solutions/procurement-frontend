@@ -47,7 +47,7 @@ export default function InventoryPage() {
   const { products } = useAppSelector((state) => state.products);
 
   useEffect(() => {
-    dispatch(getProducts(1));
+    dispatch(getProducts({ page: 1 }));
   }, [dispatch]);
 
   const getStatusColor = (status: string) => {

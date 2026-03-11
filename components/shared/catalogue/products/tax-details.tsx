@@ -1,55 +1,12 @@
-import {
-  Card,
-  NumberInput,
-  Select,
-  Stack,
-  Text,
-  Title,
-} from "@mantine/core";
+import { Card, NumberInput, Select, Stack, Text, Title } from "@mantine/core";
+import { UseFormReturnType } from "@mantine/form";
 import React, { SetStateAction, Dispatch } from "react";
 
 interface TaxDetailsProps {
-  formData: {
-    tax_status: string;
-    tax_type: string;
-    tax_value_type: string;
-    tax_value: number;
-    product_name: string;
-    category_id: string;
-    categories: string[];
-    suppliers: string[];
-    base_price: number;
-    description: string;
-    specifications: string;
-    serviceTerms: string;
-    tax_method: string;
-    opening_stock: number;
-    min_stock: number;
-    max_stock: number;
-    warehouses: string[];
-  };
-  setFormData: Dispatch<SetStateAction<{
-    tax_status: string;
-    tax_type: string;
-    tax_value_type: string;
-    tax_value: number;
-    product_name: string;
-    category_id: string;
-    categories: string[];
-    suppliers: string[];
-    base_price: number;
-    description: string;
-    specifications: string;
-    serviceTerms: string;
-    tax_method: string;
-    opening_stock: number;
-    min_stock: number;
-    max_stock: number;
-    warehouses: string[];
-  }>>;
+  form: UseFormReturnType<CreateProductFormData>;
 }
 
-const TaxDetails = ({ formData, setFormData }: TaxDetailsProps) => {
+const TaxDetails = ({ form }: TaxDetailsProps) => {
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Title order={4} mb="md">
@@ -58,29 +15,19 @@ const TaxDetails = ({ formData, setFormData }: TaxDetailsProps) => {
       <Stack gap="md">
         <Select
           label="Tax Status"
-          value={formData.tax_status}
-          onChange={(value) =>
-            setFormData({
-              ...formData,
-              tax_status: value || "exempt",
-            })
-          }
+          key={form.key("tax_status")}
+          {...form.getInputProps("tax_status")}
           data={[
             { value: "exempt", label: "Tax Exempt" },
             { value: "taxable", label: "Taxable" },
           ]}
         />
-        {formData.tax_status === "taxable" && (
+        {form.values.tax_status === "taxable" && (
           <>
             <Select
               label="Tax Type"
-              value={formData.tax_type}
-              onChange={(value) =>
-                setFormData({
-                  ...formData,
-                  tax_type: value || "inclusive",
-                })
-              }
+              key={form.key("tax_type")}
+              {...form.getInputProps("tax_type")}
               data={[
                 { value: "inclusive", label: "Inclusive" },
                 { value: "exclusive", label: "Exclusive" },
@@ -88,30 +35,28 @@ const TaxDetails = ({ formData, setFormData }: TaxDetailsProps) => {
             />
             <Select
               label="Tax Value Type"
-              value={formData.tax_value_type}
-              onChange={(value) =>
-                setFormData({
-                  ...formData,
-                  tax_value_type: value || "percentage",
-                })
-              }
+              key={form.key("tax_value_type")}
+              {...form.getInputProps("tax_value_type")}
               data={[
                 { value: "percentage", label: "Percentage" },
                 { value: "amount", label: "Amount" },
               ]}
             />
             <NumberInput
-              label={formData.tax_value_type === "percentage" ? "Tax Percentage (%)" : "Tax Amount"}
-              value={formData.tax_value}
-              onChange={(value) =>
-                setFormData({
-                  ...formData,
-                  tax_value: typeof value === "number" ? value : 0,
-                })
+              label={
+                form.values.tax_value_type === "percentage"
+                  ? "Tax Percentage (%)"
+                  : "Tax Amount"
               }
+              key={form.key("tax_value")}
+              {...form.getInputProps("tax_value")}
               min={0}
-              max={formData.tax_value_type === "percentage" ? 100 : undefined}
-              suffix={formData.tax_value_type === "percentage" ? "%" : undefined}
+              max={
+                form.values.tax_value_type === "percentage" ? 100 : undefined
+              }
+              suffix={
+                form.values.tax_value_type === "percentage" ? "%" : undefined
+              }
             />
           </>
         )}

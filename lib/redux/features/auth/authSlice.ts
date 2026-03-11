@@ -6,43 +6,43 @@ import { LoginPayload } from "./types/login-user-payload";
 import { RegisterPayload } from "./types/register-user-payload";
 import { DocumentsUpload } from "./types/documents-upload-payload";
 
-export const fetchUser = createAsyncThunk("auth/fetchUser", async () => {
-  await clientaxiosinstance.get("/sanctum/csrf-cookie");
-  const response = await clientaxiosinstance.get("/api/user");
-  return response.data as User;
-});
+function extractErrorMessage(error: unknown): string {
+  if (error instanceof AxiosError) {
+    return (
+      error.response?.data?.message ??
+      error.message ??
+      "An unexpected error occurred"
+    );
+  }
+  if (typeof error === "string") return error;
+  if (error instanceof Error) return error.message;
+  return "An unknown error occurred";
+}
+
+export const fetchUser = createAsyncThunk(
+  "auth/fetchUser",
+  async (_, { rejectWithValue }) => {
+    try {
+      await clientaxiosinstance.get("/sanctum/csrf-cookie");
+      const response = await clientaxiosinstance.get("/api/user");
+      return response.data as User;
+    } catch (error: unknown) {
+      return rejectWithValue(extractErrorMessage(error));
+    }
+  },
+);
 
 export const editUserReq = createAsyncThunk<User, User>(
   "auth/editUserReq",
   async (user, { rejectWithValue }) => {
     try {
       await clientaxiosinstance.get("/sanctum/csrf-cookie");
-
       const response = await clientaxiosinstance.post("/api/user/edit", user);
       return response.data as User;
     } catch (error: unknown) {
-      let message = "";
-
-      if (error instanceof Error) {
-        const axiosError = error as AxiosError<{ message?: string }>;
-        message =
-          axiosError.response?.data?.message ||
-          axiosError.message ||
-          "An unexpected error occurred";
-      } else if (typeof error === "string") {
-        message = error;
-      } else if (
-        typeof error === "object" &&
-        error !== null &&
-        "message" in error
-      ) {
-        message = String((error as { message: string }).message);
-      } else {
-        message = "An unknown error occurred";
-      }
-      return rejectWithValue(message);
+      return rejectWithValue(extractErrorMessage(error));
     }
-  }
+  },
 );
 
 export const uploadProfilePic = createAsyncThunk<User, { avatar: File }>(
@@ -58,35 +58,14 @@ export const uploadProfilePic = createAsyncThunk<User, { avatar: File }>(
         "/api/user/edit",
         formData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+          headers: { "Content-Type": "multipart/form-data" },
+        },
       );
       return response.data as User;
     } catch (error: unknown) {
-      let message = "";
-
-      if (error instanceof Error) {
-        const axiosError = error as AxiosError<{ message?: string }>;
-        message =
-          axiosError.response?.data?.message ||
-          axiosError.message ||
-          "An unexpected error occurred";
-      } else if (typeof error === "string") {
-        message = error;
-      } else if (
-        typeof error === "object" &&
-        error !== null &&
-        "message" in error
-      ) {
-        message = String((error as { message: string }).message);
-      } else {
-        message = "An unknown error occurred";
-      }
-      return rejectWithValue(message);
+      return rejectWithValue(extractErrorMessage(error));
     }
-  }
+  },
 );
 
 export const login = createAsyncThunk<User, LoginPayload>(
@@ -94,35 +73,15 @@ export const login = createAsyncThunk<User, LoginPayload>(
   async ({ email, password }, { rejectWithValue }) => {
     try {
       await clientaxiosinstance.get("/sanctum/csrf-cookie");
-
       const response = await clientaxiosinstance.post("/login", {
         email,
         password,
       });
       return response.data as User;
     } catch (error: unknown) {
-      let message = "";
-
-      if (error instanceof Error) {
-        const axiosError = error as AxiosError<{ message?: string }>;
-        message =
-          axiosError.response?.data?.message ||
-          axiosError.message ||
-          "An unexpected error occurred";
-      } else if (typeof error === "string") {
-        message = error;
-      } else if (
-        typeof error === "object" &&
-        error !== null &&
-        "message" in error
-      ) {
-        message = String((error as { message: string }).message);
-      } else {
-        message = "An unknown error occurred";
-      }
-      return rejectWithValue(message);
+      return rejectWithValue(extractErrorMessage(error));
     }
-  }
+  },
 );
 
 export const register = createAsyncThunk<User, RegisterPayload>(
@@ -136,67 +95,52 @@ export const register = createAsyncThunk<User, RegisterPayload>(
       documents,
       accountDetails,
     },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
-      const common = {
-        role,
-        companyInfo,
-        accountDetails,
-      };
+      const common = { role, companyInfo, accountDetails };
       const registrationData =
         role === "merchant"
-          ? {
-              ...common,
-              warehouseDetails,
-            }
-          : {
-              ...common,
-              financials,
-              documents,
-            };
+          ? { ...common, warehouseDetails }
+          : { ...common, financials, documents };
+
       await clientaxiosinstance.get("/sanctum/csrf-cookie");
       const response = await clientaxiosinstance.post(
         "/register",
-        registrationData
+        registrationData,
       );
       return response.data as User;
     } catch (error: unknown) {
-      let message = "";
-
-      if (error instanceof Error) {
-        const axiosError = error as AxiosError<{ message?: string }>;
-        message =
-          axiosError.response?.data?.message ||
-          axiosError.message ||
-          "An unexpected error occurred";
-      } else if (typeof error === "string") {
-        message = error;
-      } else if (
-        typeof error === "object" &&
-        error !== null &&
-        "message" in error
-      ) {
-        message = String((error as { message: string }).message);
-      } else {
-        message = "An unknown error occurred";
-      }
-      return rejectWithValue(message);
+      return rejectWithValue(extractErrorMessage(error));
     }
-  }
+  },
 );
 
-export const logout = createAsyncThunk("auth/logout", async () => {
-  await clientaxiosinstance.get("/sanctum/csrf-cookie");
-  const response = await clientaxiosinstance.post("/logout");
-  return response.data;
-});
+export const logout = createAsyncThunk(
+  "auth/logout",
+  async (_, { rejectWithValue }) => {
+    try {
+      await clientaxiosinstance.get("/sanctum/csrf-cookie");
+      const response = await clientaxiosinstance.post("/logout");
+      return response.data;
+    } catch (error: unknown) {
+      return rejectWithValue(extractErrorMessage(error));
+    }
+  },
+);
 
-export const logoutAll = createAsyncThunk("auth/logoutAll", async () => {
-  await clientaxiosinstance.get("/sanctum/csrf-cookie");
-  const response = await clientaxiosinstance.post("/logout-all");
-  return response.data;
-});
+export const logoutAll = createAsyncThunk(
+  "auth/logoutAll",
+  async (_, { rejectWithValue }) => {
+    try {
+      await clientaxiosinstance.get("/sanctum/csrf-cookie");
+      const response = await clientaxiosinstance.post("/logout-all");
+      return response.data;
+    } catch (error: unknown) {
+      return rejectWithValue(extractErrorMessage(error));
+    }
+  },
+);
 
 export const uploadDocuments = createAsyncThunk<User, DocumentsUpload>(
   "auth/uploadDocuments",
@@ -215,35 +159,14 @@ export const uploadDocuments = createAsyncThunk<User, DocumentsUpload>(
         "/upload-documents",
         formData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+          headers: { "Content-Type": "multipart/form-data" },
+        },
       );
       return response.data as User;
     } catch (error: unknown) {
-      let message = "";
-
-      if (error instanceof Error) {
-        const axiosError = error as AxiosError<{ message?: string }>;
-        message =
-          axiosError.response?.data?.message ||
-          axiosError.message ||
-          "An unexpected error occurred";
-      } else if (typeof error === "string") {
-        message = error;
-      } else if (
-        typeof error === "object" &&
-        error !== null &&
-        "message" in error
-      ) {
-        message = String((error as { message: string }).message);
-      } else {
-        message = "An unknown error occurred";
-      }
-      return rejectWithValue(message);
+      return rejectWithValue(extractErrorMessage(error));
     }
-  }
+  },
 );
 
 interface AuthState {
@@ -252,7 +175,7 @@ interface AuthState {
   error: string | null;
 }
 
-const state: AuthState = {
+const initialState: AuthState = {
   user: null,
   loading: false,
   error: null,
@@ -260,7 +183,7 @@ const state: AuthState = {
 
 export const authSlice = createSlice({
   name: "auth",
-  initialState: state,
+  initialState,
   reducers: {},
   extraReducers(builder) {
     builder
@@ -275,7 +198,7 @@ export const authSlice = createSlice({
       })
       .addCase(fetchUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message ?? "An error occurred";
+        state.error = (action.payload as string) ?? "An error occurred";
       });
 
     builder
@@ -286,10 +209,11 @@ export const authSlice = createSlice({
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
+        state.error = null;
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message ?? "An error occurred";
+        state.error = (action.payload as string) ?? "An error occurred";
       });
 
     builder
@@ -300,10 +224,11 @@ export const authSlice = createSlice({
       .addCase(register.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
+        state.error = null;
       })
       .addCase(register.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message ?? "An error occurred";
+        state.error = (action.payload as string) ?? "An error occurred";
       });
 
     builder
@@ -314,10 +239,26 @@ export const authSlice = createSlice({
       .addCase(editUserReq.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
+        state.error = null;
       })
       .addCase(editUserReq.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message ?? "An error occurred";
+        state.error = (action.payload as string) ?? "An error occurred";
+      });
+
+    builder
+      .addCase(uploadProfilePic.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(uploadProfilePic.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+        state.error = null;
+      })
+      .addCase(uploadProfilePic.rejected, (state, action) => {
+        state.loading = false;
+        state.error = (action.payload as string) ?? "An error occurred";
       });
 
     builder
@@ -328,10 +269,11 @@ export const authSlice = createSlice({
       .addCase(logout.fulfilled, (state) => {
         state.loading = false;
         state.user = null;
+        state.error = null;
       })
       .addCase(logout.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message ?? "An error occurred";
+        state.error = (action.payload as string) ?? "An error occurred";
       });
 
     builder
@@ -342,10 +284,26 @@ export const authSlice = createSlice({
       .addCase(logoutAll.fulfilled, (state) => {
         state.loading = false;
         state.user = null;
+        state.error = null;
       })
       .addCase(logoutAll.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message ?? "An error occurred";
+        state.error = (action.payload as string) ?? "An error occurred";
+      });
+
+    builder
+      .addCase(uploadDocuments.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(uploadDocuments.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+        state.error = null;
+      })
+      .addCase(uploadDocuments.rejected, (state, action) => {
+        state.loading = false;
+        state.error = (action.payload as string) ?? "An error occurred";
       });
   },
 });

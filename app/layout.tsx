@@ -55,7 +55,7 @@ export default function RootLayout({
               },
             })}
           >
-            <Notifications position="top-right" />
+            <Notifications position="bottom-right" />
             <LayoutContent>{children}</LayoutContent>
           </MantineProvider>
         </StoreProvider>

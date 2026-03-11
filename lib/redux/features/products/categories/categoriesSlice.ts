@@ -22,10 +22,10 @@ export const fetchCategories = createAsyncThunk(
   async (page: number = 1) => {
     await clientaxiosinstance.get("/sanctum/csrf-cookie");
     const response = await clientaxiosinstance.get(
-      `/product-categories?page=${page}`
+      `/product-categories?page=${page}`,
     );
     return response.data;
-  }
+  },
 );
 
 export const searchCategories = createAsyncThunk(
@@ -33,10 +33,10 @@ export const searchCategories = createAsyncThunk(
   async (searchTerm: string = "") => {
     await clientaxiosinstance.get("/sanctum/csrf-cookie");
     const response = await clientaxiosinstance.get(
-      `/product-categories/search?searchTerm=${searchTerm}`
+      `/product-categories/search?searchTerm=${searchTerm}`,
     );
     return response.data;
-  }
+  },
 );
 
 interface CreateCategoryPayload {
@@ -62,10 +62,11 @@ export const createCategory = createAsyncThunk(
         headers: {
           "Content-Type": "multipart/form-data",
         },
-      }
+      },
     );
+
     return response.data;
-  }
+  },
 );
 
 export const productsSlice = createSlice({

@@ -315,7 +315,7 @@ export default function Registration() {
       supplierRegData.append("companyInfo[trading_name]", tradingName);
       supplierRegData.append(
         "companyInfo[registration_number]",
-        supplierRegistrationNumber
+        supplierRegistrationNumber,
       );
       supplierRegData.append("companyInfo[tax_id]", supplierVatTaxId);
       supplierRegData.append("companyInfo[website]", "");
@@ -326,7 +326,7 @@ export default function Registration() {
       supplierRegData.append("financials[bank_name]", bankName);
       supplierRegData.append(
         "financials[bank_account_number]",
-        bankAccountNumber
+        bankAccountNumber,
       );
       supplierRegData.append("financials[swift_bic]", swiftBic);
       supplierRegData.append("financials[payment_terms]", paymentTerms);
@@ -336,7 +336,7 @@ export default function Registration() {
       supplierRegData.append("accountDetails[password]", password);
       supplierRegData.append(
         "accountDetails[password_confirmation]",
-        confirmPassword
+        confirmPassword,
       );
 
       let finalData = null;
@@ -412,7 +412,7 @@ export default function Registration() {
       }
     } else {
       setErrorMessage(
-        "Please fill in all required fields and ensure passwords match."
+        "Please fill in all required fields and ensure passwords match.",
       );
       setErrorModalOpen(true);
     }
@@ -864,7 +864,7 @@ export default function Registration() {
                       />
 
                       <Title order={4} c="dimmed" mt="lg">
-                        Payment Terms (Optional)
+                        Payment Terms
                       </Title>
                       <RichTextEditor
                         editor={useEditor({

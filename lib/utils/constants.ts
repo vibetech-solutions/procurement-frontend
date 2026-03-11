@@ -160,69 +160,6 @@ export const navItems = [
   { label: "Reports", icon: IconChartBar, href: "/application/reports" },
 ];
 
-export const catalogueItems = [
-  {
-    id: "CAT-001",
-    name: "Ergonomic Office Chair",
-    category: "Furniture",
-    supplier: "Office Pro Ltd",
-    price: "KES 38,999",
-    description: "Premium ergonomic chair with lumbar support",
-    image: "/ergonomic-office-chair.png",
-    inStock: true,
-  },
-  {
-    id: "CAT-002",
-    name: "Laptop - Dell XPS 15",
-    category: "IT Equipment",
-    supplier: "Tech Solutions Inc",
-    price: "KES 194,999",
-    description: "High-performance laptop for business use",
-    image: "/modern-laptop.png",
-    inStock: true,
-  },
-  {
-    id: "CAT-003",
-    name: "Printer Paper (500 sheets)",
-    category: "Office Supplies",
-    supplier: "Supplies Direct",
-    price: "KES 1,689",
-    description: "A4 white printer paper, 80gsm",
-    image: "/printer-paper.jpg",
-    inStock: true,
-  },
-  {
-    id: "CAT-004",
-    name: "Standing Desk",
-    category: "Furniture",
-    supplier: "Office Pro Ltd",
-    price: "KES 77,999",
-    description: "Electric height-adjustable standing desk",
-    image: "/standing-desk-setup.png",
-    inStock: false,
-  },
-  {
-    id: "CAT-005",
-    name: "Wireless Mouse",
-    category: "IT Equipment",
-    supplier: "Tech Solutions Inc",
-    price: "KES 3,899",
-    description: "Ergonomic wireless mouse with USB receiver",
-    image: "/wireless-mouse.png",
-    inStock: true,
-  },
-  {
-    id: "CAT-006",
-    name: "Whiteboard Markers (Pack of 12)",
-    category: "Office Supplies",
-    supplier: "Supplies Direct",
-    price: "KES 1,169",
-    description: "Assorted colors, dry-erase markers",
-    image: "/whiteboard-markers.jpg",
-    inStock: true,
-  },
-];
-
 export const nonTangibleCatalogueItems = [
   {
     id: "SRV-001",
@@ -1687,4 +1624,48 @@ export const supplierNavItems = [
   },
   { label: "Orders", icon: IconTruck, href: "/supplier/orders" },
   { label: "Profile", icon: IconUser, href: "/supplier/profile" },
+];
+
+export const recommendedProducts = [
+  {
+    id: "REC-001",
+    name: "Wireless Presentation Remote",
+    description:
+      "Bluetooth presentation remote with laser pointer for conference rooms",
+    category: "Electronics",
+    estimatedPrice: "KES 3,500",
+    requestedBy: "John Doe",
+    requestDate: "2024-01-15",
+    reason: "Needed for client presentations in meeting rooms",
+    status: "pending",
+    type: "product",
+  },
+  {
+    id: "REC-002",
+    name: "Ergonomic Standing Desk Converter",
+    description:
+      "Adjustable standing desk converter for health and productivity",
+    category: "Office Furniture",
+    estimatedPrice: "KES 25,000",
+    requestedBy: "Jane Smith",
+    requestDate: "2024-01-14",
+    reason: "To improve employee wellness and reduce back strain",
+    status: "pending",
+    type: "product",
+  },
+];
+
+export const recommendedServices = [
+  {
+    id: "REC-003",
+    name: "Cloud Storage Backup Service",
+    description: "Monthly cloud backup service for critical business data",
+    category: "IT Services",
+    estimatedPrice: "KES 8,000/month",
+    requestedBy: "Mike Johnson",
+    requestDate: "2024-01-13",
+    reason: "Need reliable backup solution for data security compliance",
+    status: "pending",
+    type: "service",
+  },
 ];

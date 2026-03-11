@@ -46,6 +46,7 @@ import { addProduct } from "@/lib/redux/features/products/productsSlice";
 import { notifications } from "@mantine/notifications";
 import WarehousesMultiSelect from "@/components/shared/catalogue/warehouses/warehouses-multi-select";
 import { fetchCategories } from "@/lib/redux/features/products/categories/categoriesSlice";
+import { useForm } from "@mantine/form";
 
 export default function NewInternalCatalogItem() {
   const router = useRouter();
@@ -53,27 +54,27 @@ export default function NewInternalCatalogItem() {
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
   const [itemType, setItemType] = useState<string | null>(type);
-  const [formData, setFormData] = useState({
-    product_name: "",
-    category_id: "",
-    categories: [] as string[],
-    suppliers: [] as string[],
-    base_price: 0,
-    description: "",
-    specifications: "",
-    serviceTerms: "",
-    tax_status: "taxable",
-    tax_type: "inclusive",
-    tax_method: "percentage",
-    tax_value_type: "percentage",
-    tax_value: 16,
-    opening_stock: 0,
-    min_stock: 0,
-    max_stock: 0,
-    warehouses: [] as string[],
+
+  const form = useForm<CreateProductFormData>({
+    mode: "controlled",
+    initialValues: {
+      product_name: "",
+      category_id: "",
+      categories: [] as string[],
+      suppliers: [] as string[],
+      base_price: 0,
+      description: "",
+      specifications: "",
+      serviceTerms: "",
+      tax_status: "taxable",
+      tax_type: "inclusive",
+      tax_method: "percentage",
+      tax_value_type: "percentage",
+      tax_value: 16,
+    },
   });
 
-  const editor = useEditor({
+  const specificationsEditor = useEditor({
     extensions: [
       StarterKit,
       Superscript,
@@ -81,10 +82,10 @@ export default function NewInternalCatalogItem() {
       Highlight,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
     ],
-    content: formData.specifications || "<p></p>",
+    content: form.values.specifications || "<p></p>",
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
-      setFormData((prev) => ({ ...prev, specifications: editor.getHTML() }));
+      form.setFieldValue("specifications", editor.getHTML());
     },
   });
 
@@ -96,10 +97,10 @@ export default function NewInternalCatalogItem() {
       Highlight,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
     ],
-    content: formData.serviceTerms || "<p></p>",
+    content: form.values.serviceTerms || "<p></p>",
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
-      setFormData((prev) => ({ ...prev, serviceTerms: editor.getHTML() }));
+      form.setFieldValue("serviceTerms", editor.getHTML());
     },
   });
 
@@ -135,7 +136,7 @@ export default function NewInternalCatalogItem() {
     try {
       const submitData = new FormData();
 
-      Object.entries(formData).forEach(([key, value]) => {
+      Object.entries(form.values).forEach(([key, value]) => {
         if (Array.isArray(value)) {
           value.forEach((item, index) => {
             submitData.append(`${key}[${index}]`, item);
@@ -161,46 +162,22 @@ export default function NewInternalCatalogItem() {
       });
       router.push("/application/catalogue/internal");
     } catch (error: unknown) {
-      console.log("Full error object:", error); // Debug log
       let errorMessage = "Failed to create product";
 
-      if (error && typeof error === "object") {
-        // Handle Redux Toolkit error structure
-        if ("message" in error && typeof error.message === "string") {
-          try {
-            const parsedError = JSON.parse(error.message);
-            if (parsedError.errors) {
-              const validationErrors = Object.values(parsedError.errors)
-                .flat()
-                .join(". ");
-              errorMessage = validationErrors;
-            } else if (parsedError.message) {
-              errorMessage = parsedError.message;
-            }
-          } catch {
-            errorMessage = error.message;
-          }
-        }
-        // Handle direct response structure
-        else if ("response" in error) {
-          const errorResponse = error.response as {
-            data?: { errors?: Record<string, string[]>; message?: string };
-          };
-          if (errorResponse.data?.errors) {
-            const validationErrors = Object.values(errorResponse.data.errors)
-              .flat()
-              .join(". ");
-            errorMessage = validationErrors;
-          } else if (errorResponse.data?.message) {
-            errorMessage = errorResponse.data.message;
-          }
-        }
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
+      // unwrap() throws the rejectWithValue payload directly
+      const payload = error as {
+        errors?: Record<string, string[]>;
+        message?: string;
+      };
+
+      if (payload?.errors) {
+        errorMessage = Object.values(payload.errors).flat().join(". ");
+      } else if (payload?.message) {
+        errorMessage = payload.message;
       }
 
       notifications.show({
-        title: "Validation Error",
+        title: "Error",
         message: errorMessage,
         color: "red",
       });
@@ -208,7 +185,6 @@ export default function NewInternalCatalogItem() {
       setIsLoading(false);
     }
   };
-
   return (
     <ContentContainer>
       <Stack gap="lg">
@@ -271,32 +247,19 @@ export default function NewInternalCatalogItem() {
                       <TextInput
                         label="Product Name"
                         placeholder="e.g., Ergonomic Office Chair"
-                        value={formData.product_name}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            product_name: e.target.value,
-                          })
-                        }
+                        key={form.key("product_name")}
+                        {...form.getInputProps("product_name")}
                         required
                         maxLength={125}
                       />
 
-                      <CategoriesSelect
-                        formData={formData}
-                        setFormData={setFormData}
-                      />
+                      <CategoriesSelect form={form} />
 
                       <Textarea
                         label="Description"
                         placeholder="Detailed description of the item..."
-                        value={formData.description}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            description: e.target.value,
-                          })
-                        }
+                        key={form.key("description")}
+                        {...form.getInputProps("description")}
                         rows={4}
                         required
                         maxLength={255}
@@ -305,7 +268,7 @@ export default function NewInternalCatalogItem() {
                         <Text size="sm" fw={500} mb="xs">
                           Specifications
                         </Text>
-                        {!editor ? (
+                        {!specificationsEditor ? (
                           <Group justify="center" p="xl">
                             <Loader size="sm" />
                             <Text size="sm" c="dimmed">
@@ -313,7 +276,7 @@ export default function NewInternalCatalogItem() {
                             </Text>
                           </Group>
                         ) : (
-                          <RichTextEditor editor={editor}>
+                          <RichTextEditor editor={specificationsEditor}>
                             <RichTextEditor.Toolbar sticky stickyOffset={60}>
                               <RichTextEditor.ControlsGroup>
                                 <RichTextEditor.Bold />
@@ -386,7 +349,9 @@ export default function NewInternalCatalogItem() {
                                 }">${file.name}</a> (${(
                                   file.size / 1024
                                 ).toFixed(1)} KB)</p>`;
-                                editor?.commands.insertContent(link);
+                                specificationsEditor?.commands.insertContent(
+                                  link,
+                                );
                               });
                             }
                           }}
@@ -408,7 +373,7 @@ export default function NewInternalCatalogItem() {
                                   variant="subtle"
                                   onClick={() =>
                                     setAttachments(
-                                      attachments.filter((_, i) => i !== index)
+                                      attachments.filter((_, i) => i !== index),
                                     )
                                   }
                                 >
@@ -436,10 +401,8 @@ export default function NewInternalCatalogItem() {
                             supplier.supplier_trading_name ??
                             supplier.company_name,
                         }))}
-                        value={formData.suppliers}
-                        onChange={(value) =>
-                          setFormData({ ...formData, suppliers: value })
-                        }
+                        key={form.key("suppliers")}
+                        {...form.getInputProps("suppliers")}
                         searchable
                         required
                       />
@@ -498,59 +461,7 @@ export default function NewInternalCatalogItem() {
                     </Stack>
                   </Card>
 
-                  <Card shadow="sm" padding="lg" radius="md" withBorder>
-                    <Title order={4} mb="md">
-                      Stock Details
-                    </Title>
-                    <Stack gap="md">
-                      <WarehousesMultiSelect
-                        formData={formData}
-                        setFormData={setFormData}
-                      />
-                      <NumberInput
-                        label="Opening Stock"
-                        placeholder="0"
-                        value={formData.opening_stock || 0}
-                        onChange={(value) =>
-                          setFormData({
-                            ...formData,
-                            opening_stock:
-                              typeof value === "number" ? value : 0,
-                          })
-                        }
-                        min={0}
-                        required
-                      />
-                      <NumberInput
-                        label="Minimum Value"
-                        placeholder="0"
-                        value={formData.min_stock}
-                        onChange={(value) =>
-                          setFormData({
-                            ...formData,
-                            min_stock: typeof value === "number" ? value : 0,
-                          })
-                        }
-                        min={0}
-                        required
-                      />
-                      <NumberInput
-                        label="Maximum Value"
-                        placeholder="0"
-                        value={formData.max_stock}
-                        onChange={(value) =>
-                          setFormData({
-                            ...formData,
-                            max_stock: typeof value === "number" ? value : 0,
-                          })
-                        }
-                        min={0}
-                        required
-                      />
-                    </Stack>
-                  </Card>
-
-                  <TaxDetails formData={formData} setFormData={setFormData} />
+                  <TaxDetails form={form} />
                 </Stack>
               </Grid.Col>
             </Grid>
@@ -568,13 +479,8 @@ export default function NewInternalCatalogItem() {
                       <TextInput
                         label="Service Name"
                         placeholder="e.g., Flight Booking Service"
-                        value={formData.product_name}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            product_name: e.target.value,
-                          })
-                        }
+                        key={form.key("product_name")}
+                        {...form.getInputProps("product_name")}
                         required
                       />
                       <Grid gutter="md">
@@ -588,13 +494,8 @@ export default function NewInternalCatalogItem() {
                                   value: category.id.toString(),
                                   label: category.name,
                                 }))}
-                                value={formData.category_id}
-                                onChange={(value) =>
-                                  setFormData({
-                                    ...formData,
-                                    category_id: value || "",
-                                  })
-                                }
+                                key={form.key("category_id")}
+                                {...form.getInputProps("category_id")}
                                 searchable
                                 required
                               />
@@ -604,15 +505,11 @@ export default function NewInternalCatalogItem() {
                               variant="outline"
                               onClick={() => {
                                 const categoryName = prompt(
-                                  "Enter category name:"
+                                  "Enter category name:",
                                 );
                                 if (categoryName?.trim()) {
-                                  // For now, just add it locally - you can integrate with API later
                                   const newId = Date.now().toString();
-                                  setFormData({
-                                    ...formData,
-                                    category_id: newId,
-                                  });
+                                  form.setFieldValue("category_id", newId);
                                   notifications.show({
                                     title: "Category Created",
                                     message: `Category "${categoryName}" created successfully`,
@@ -629,14 +526,8 @@ export default function NewInternalCatalogItem() {
                           <NumberInput
                             label="Base Price (KES)"
                             placeholder="0"
-                            value={formData.base_price}
-                            onChange={(value) =>
-                              setFormData({
-                                ...formData,
-                                base_price:
-                                  typeof value === "number" ? value : 0,
-                              })
-                            }
+                            key={form.key("base_price")}
+                            {...form.getInputProps("base_price")}
                             min={0}
                             prefix="From KES "
                             thousandSeparator=","
@@ -647,13 +538,8 @@ export default function NewInternalCatalogItem() {
                       <Textarea
                         label="Service Description"
                         placeholder="Detailed description of the service offered..."
-                        value={formData.description}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            description: e.target.value,
-                          })
-                        }
+                        key={form.key("description")}
+                        {...form.getInputProps("descrition")}
                         rows={4}
                         required
                       />
@@ -714,7 +600,7 @@ export default function NewInternalCatalogItem() {
                                   onClick={() =>
                                     document
                                       .getElementById(
-                                        "service-attachment-input"
+                                        "service-attachment-input",
                                       )
                                       ?.click()
                                   }
@@ -748,7 +634,7 @@ export default function NewInternalCatalogItem() {
                                   file.size / 1024
                                 ).toFixed(1)} KB)</p>`;
                                 serviceTermsEditor?.commands.insertContent(
-                                  link
+                                  link,
                                 );
                               });
                             }
@@ -772,8 +658,8 @@ export default function NewInternalCatalogItem() {
                                   onClick={() =>
                                     setServiceAttachments(
                                       serviceAttachments.filter(
-                                        (_, i) => i !== index
-                                      )
+                                        (_, i) => i !== index,
+                                      ),
                                     )
                                   }
                                 >
@@ -785,8 +671,7 @@ export default function NewInternalCatalogItem() {
                         )}
                       </div>
 
-                      {/* Category-specific fields for services */}
-                      {formData.category_id === "Travel" && (
+                      {form.values.category_id === "Travel" && (
                         <Grid gutter="md">
                           <Grid.Col span={12}>
                             <Text size="sm" fw={500} c="blue">
@@ -843,10 +728,8 @@ export default function NewInternalCatalogItem() {
                           "Corporate Training Ltd",
                           "Business Consulting Kenya",
                         ]}
-                        value={formData.suppliers}
-                        onChange={(value) =>
-                          setFormData({ ...formData, suppliers: value })
-                        }
+                        key={form.key("suppliers")}
+                        {...form.getInputProps("suppliers")}
                         searchable
                         required
                       />
@@ -855,7 +738,7 @@ export default function NewInternalCatalogItem() {
                 </Stack>
               </Grid.Col>
 
-              <TaxDetails formData={formData} setFormData={setFormData} />
+              <TaxDetails form={form} />
             </Grid>
           </Tabs.Panel>
         </Tabs>

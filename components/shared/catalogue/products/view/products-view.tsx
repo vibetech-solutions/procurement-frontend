@@ -1,22 +1,20 @@
-import { Button, Grid, Group, Pagination, Stack, Text } from "@mantine/core";
+import { useAppSelector } from "@/lib/redux/hooks";
+import {
+  Button,
+  Center,
+  Grid,
+  Group,
+  Loader,
+  Pagination,
+  Stack,
+  Text,
+} from "@mantine/core";
 import { IconGrid3x3, IconList } from "@tabler/icons-react";
 import React from "react";
 import ProductGridView from "./grid-view";
 import ProductTableView from "./table-view";
-import { Product } from "@/types/product";
-
-type CatalogItem = Product | {
-  id: string;
-  name: string;
-  category: string;
-  supplier: string;
-  price: string;
-  description: string;
-  inStock: boolean;
-};
 
 interface ProductsViewProps {
-  currentItems: CatalogItem[];
   activeTab: string;
   viewMode: "grid" | "list";
   setViewMode: (mode: "grid" | "list") => void;
@@ -24,18 +22,24 @@ interface ProductsViewProps {
 }
 
 const ProductsView = ({
-  currentItems,
   activeTab,
   viewMode,
   setViewMode,
   pagination,
 }: ProductsViewProps) => {
+  const { products, productsLoading } = useAppSelector(
+    (state) => state.products,
+  );
+  console.log("products in view:", products, "loading:", productsLoading);
+
   return (
     <Grid.Col span={{ base: 12, md: 9 }}>
       <Stack gap="md">
         <Group justify="space-between">
           <Text size="sm" c="dimmed">
-            Showing {currentItems.length} items
+            {productsLoading
+              ? "Loading..."
+              : `Showing ${products.length} items`}
           </Text>
           <Group gap="xs">
             <Button
@@ -57,10 +61,14 @@ const ProductsView = ({
           </Group>
         </Group>
 
-        {viewMode === "grid" ? (
-          <ProductGridView currentItems={currentItems} activeTab={activeTab} />
+        {productsLoading ? (
+          <Center py="xl">
+            <Loader size="md" />
+          </Center>
+        ) : viewMode === "grid" ? (
+          <ProductGridView activeTab={activeTab} />
         ) : (
-          <ProductTableView activeTab={activeTab} currentItems={currentItems} />
+          <ProductTableView activeTab={activeTab} />
         )}
 
         <Group justify="center" mt="xl">
