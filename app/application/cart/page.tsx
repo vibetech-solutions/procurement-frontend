@@ -1,7 +1,7 @@
 "use client";
 
 import { ContentContainer } from "@/components/layout/content-container";
-import { cartItemsCart, nonTangibleCartItems } from "@/lib/utils/constants";
+import { useAppSelector } from "@/lib/redux/hooks";
 import {
   Card,
   Text,
@@ -36,37 +36,24 @@ export default function CartPage() {
   const [activeTab, setActiveTab] = useState<string | null>("inventory");
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [proceedModalOpen, setProceedModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<
-    (typeof nonTangibleCartItems)[0] | null
-  >(null);
+  const [selectedItem, setSelectedItem] = useState<CartService | null>(null);
   const [selectedService, setSelectedService] = useState<string>("");
-  const [bookingData, setBookingData] = useState({
-    quantity: 1,
-    duration: "",
-    startDate: "",
-    endDate: "",
-    from: "",
-    to: "",
-    flightType: "Economy",
-    roomType: "Standard",
-    carType: "Economy",
-    guests: 1,
-    notes: "",
-  });
 
-  const inventorySubtotal = cartItemsCart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+  const { products, services } = useAppSelector((state) => state.cart);
+
+  const inventorySubtotal = products.reduce(
+    (sum, item) => sum + item.product.base_price * item.quantity,
     0,
   );
-  const nonTangibleSubtotal = nonTangibleCartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+  const nonTangibleSubtotal = services.reduce(
+    (sum, item) => sum + item.service.base_price * item.quantity,
     0,
   );
   const subtotal = inventorySubtotal + nonTangibleSubtotal;
   const tax = subtotal * 0.1;
   const total = subtotal + tax;
 
-  const totalItems = cartItemsCart.length + nonTangibleCartItems.length;
+  const totalItems = products.length + services.length;
 
   return (
     <ContentContainer>
@@ -98,27 +85,27 @@ export default function CartPage() {
                     value="inventory"
                     leftSection={<IconPackage size={16} />}
                   >
-                    Inventory Items ({cartItemsCart.length})
+                    Inventory Items ({products.length})
                   </Tabs.Tab>
                   <Tabs.Tab
                     value="services"
                     leftSection={<IconPlane size={16} />}
                   >
-                    Non-Tangibles ({nonTangibleCartItems.length})
+                    Non-Tangibles ({services.length})
                   </Tabs.Tab>
                 </Tabs.List>
 
                 <Tabs.Panel value="inventory" pt="md">
                   <Stack gap="md">
-                    {cartItemsCart.map((item) => (
-                      <Paper key={item.id} p="md" withBorder>
+                    {products.map((item) => (
+                      <Paper key={item.product.id} p="md" withBorder>
                         <Group align="flex-start" wrap="nowrap">
                           <div
                             style={{ width: 100, height: 100, flexShrink: 0 }}
                           >
                             <Image
-                              src={item.image || "/placeholder.svg"}
-                              alt={item.name}
+                              src={item.product.image || "/placeholder.svg"}
+                              alt={item.product.name}
                               fit="contain"
                               radius="md"
                               width="100%"
@@ -129,13 +116,14 @@ export default function CartPage() {
                           <Stack gap="xs" style={{ flex: 1 }}>
                             <div>
                               <Text fw={600} size="sm">
-                                {item.name}
+                                {item.product.name}
                               </Text>
                               <Text size="xs" c="dimmed">
-                                {item.id} • {item.category}
+                                {item.product.id} • {item.product.category.name}
                               </Text>
                               <Text size="xs" c="dimmed" mt={4}>
-                                Supplier: {item.supplier}
+                                Supplier:{" "}
+                                {item.product.suppliers[0].company_name}
                               </Text>
                             </div>
 
@@ -158,7 +146,8 @@ export default function CartPage() {
                                     Unit Price
                                   </Text>
                                   <Text size="sm" fw={600}>
-                                    KES {item.price.toLocaleString()}
+                                    KES{" "}
+                                    {item.product.base_price.toLocaleString()}
                                   </Text>
                                 </div>
                                 <div>
@@ -168,7 +157,7 @@ export default function CartPage() {
                                   <Text size="sm" fw={700} c="cyan">
                                     KES{" "}
                                     {(
-                                      item.price * item.quantity
+                                      item.product.base_price * item.quantity
                                     ).toLocaleString()}
                                   </Text>
                                 </div>
@@ -191,46 +180,37 @@ export default function CartPage() {
 
                 <Tabs.Panel value="services" pt="md">
                   <Stack gap="md">
-                    {nonTangibleCartItems.map((item) => (
+                    {services.map((item) => (
                       <Paper
-                        key={item.id}
+                        key={item.service.id}
                         p="md"
                         withBorder
                         style={{ cursor: "pointer" }}
                         onClick={() => {
                           setSelectedItem(item);
-                          setBookingData({
-                            quantity: item.quantity,
-                            duration: "",
-                            startDate: "",
-                            endDate: "",
-                            from: "",
-                            to: "",
-                            flightType: "Economy",
-                            roomType: "Standard",
-                            carType: "Economy",
-                            guests: 1,
-                            notes: "",
-                          });
                           setEditModalOpen(true);
                         }}
                       >
                         <Stack gap="xs">
                           <div>
                             <Text fw={600} size="sm">
-                              {item.name}
+                              {item.service.name}
                             </Text>
                             <Text size="xs" c="dimmed">
-                              {item.id} • {item.category}
+                              {item.service.id} • {item.service.category.name}
                             </Text>
                             <Group justify="space-between" align="flex-start">
                               <div>
                                 <Text size="xs" c="dimmed" mt={4}>
-                                  Supplier: {item.supplier}
+                                  Supplier:{" "}
+                                  {
+                                    item.service.sellable.suppliers[0]
+                                      .company_name
+                                  }
                                 </Text>
-                                {item.description && (
+                                {item.service.description && (
                                   <Text size="xs" c="dimmed" mt={2}>
-                                    {item.description}
+                                    {item.service.description}
                                   </Text>
                                 )}
                               </div>
@@ -259,7 +239,7 @@ export default function CartPage() {
                                   Unit Price
                                 </Text>
                                 <Text size="sm" fw={600}>
-                                  KES {item.price.toLocaleString()}
+                                  KES {item.service.base_price.toLocaleString()}
                                 </Text>
                               </div>
                               <div>
@@ -269,7 +249,7 @@ export default function CartPage() {
                                 <Text size="sm" fw={700} c="cyan">
                                   KES{" "}
                                   {(
-                                    item.price * item.quantity
+                                    item.service.base_price * item.quantity
                                   ).toLocaleString()}
                                 </Text>
                               </div>
@@ -326,7 +306,9 @@ export default function CartPage() {
                   size="lg"
                   mt="xl"
                   onClick={() => {
-                    setSelectedService(nonTangibleCartItems[0]?.id || "");
+                    setSelectedService(
+                      services[0]?.service.id.toString() || "",
+                    );
                     setProceedModalOpen(true);
                   }}
                 >
@@ -352,142 +334,50 @@ export default function CartPage() {
         <Modal
           opened={editModalOpen}
           onClose={() => setEditModalOpen(false)}
-          title={`Edit Booking - ${selectedItem?.name}`}
+          title={`Edit Booking - ${selectedItem?.service.name}`}
           size="lg"
         >
           {selectedItem && (
             <Stack gap="md">
               <Group grow>
-                <NumberInput
-                  label="Quantity"
-                  value={bookingData.quantity}
-                  onChange={(value) =>
-                    setBookingData({
-                      ...bookingData,
-                      quantity: typeof value === "number" ? value : 1,
-                    })
-                  }
-                  min={1}
-                  max={100}
-                />
-                <TextInput
-                  label="Duration (days)"
-                  value={bookingData.duration}
-                  onChange={(event) =>
-                    setBookingData({
-                      ...bookingData,
-                      duration: event.currentTarget.value,
-                    })
-                  }
-                />
+                <NumberInput label="Quantity" min={1} max={100} />
+                <TextInput label="Duration (days)" />
               </Group>
 
               <Group grow>
-                <TextInput
-                  label="Start Date"
-                  type="date"
-                  value={bookingData.startDate}
-                  onChange={(event) =>
-                    setBookingData({
-                      ...bookingData,
-                      startDate: event.currentTarget.value,
-                    })
-                  }
-                />
-                <TextInput
-                  label="End Date"
-                  type="date"
-                  value={bookingData.endDate}
-                  onChange={(event) =>
-                    setBookingData({
-                      ...bookingData,
-                      endDate: event.currentTarget.value,
-                    })
-                  }
-                />
+                <TextInput label="Start Date" type="date" />
+                <TextInput label="End Date" type="date" />
               </Group>
 
-              {selectedItem.category === "Travel" &&
-                selectedItem.name.includes("Flight") && (
+              {selectedItem.service.category.name === "Travel" &&
+                selectedItem.service.name.includes("Flight") && (
                   <>
                     <Group grow>
-                      <TextInput
-                        label="From"
-                        placeholder="Departure city"
-                        value={bookingData.from || ""}
-                        onChange={(event) =>
-                          setBookingData({
-                            ...bookingData,
-                            from: event.currentTarget.value,
-                          })
-                        }
-                      />
-                      <TextInput
-                        label="To"
-                        placeholder="Destination city"
-                        value={bookingData.to || ""}
-                        onChange={(event) =>
-                          setBookingData({
-                            ...bookingData,
-                            to: event.currentTarget.value,
-                          })
-                        }
-                      />
+                      <TextInput label="From" placeholder="Departure city" />
+                      <TextInput label="To" placeholder="Destination city" />
                     </Group>
                     <Select
                       label="Flight Type"
-                      value={bookingData.flightType}
-                      onChange={(value) =>
-                        setBookingData({
-                          ...bookingData,
-                          flightType: value || "Economy",
-                        })
-                      }
                       data={["Economy", "Business", "First Class"]}
                     />
                   </>
                 )}
 
-              {selectedItem.category === "Travel" &&
-                selectedItem.name.includes("Hotel") && (
+              {selectedItem.service.category.name === "Travel" &&
+                selectedItem.service.name.includes("Hotel") && (
                   <Group grow>
                     <Select
                       label="Room Type"
-                      value={bookingData.roomType}
-                      onChange={(value) =>
-                        setBookingData({
-                          ...bookingData,
-                          roomType: value || "Standard",
-                        })
-                      }
                       data={["Standard", "Deluxe", "Suite", "Executive"]}
                     />
-                    <NumberInput
-                      label="Number of Guests"
-                      value={bookingData.guests}
-                      onChange={(value) =>
-                        setBookingData({
-                          ...bookingData,
-                          guests: typeof value === "number" ? value : 1,
-                        })
-                      }
-                      min={1}
-                      max={10}
-                    />
+                    <NumberInput label="Number of Guests" min={1} max={10} />
                   </Group>
                 )}
 
-              {selectedItem.category === "Transport" &&
-                selectedItem.name.includes("Car") && (
+              {selectedItem.service.category.name === "Transport" &&
+                selectedItem.service.name.includes("Car") && (
                   <Select
                     label="Car Type"
-                    value={bookingData.carType}
-                    onChange={(value) =>
-                      setBookingData({
-                        ...bookingData,
-                        carType: value || "Economy",
-                      })
-                    }
                     data={[
                       "Economy",
                       "Compact",
@@ -501,13 +391,6 @@ export default function CartPage() {
 
               <Textarea
                 label="Special Notes"
-                value={bookingData.notes}
-                onChange={(event) =>
-                  setBookingData({
-                    ...bookingData,
-                    notes: event.currentTarget.value,
-                  })
-                }
                 rows={3}
                 placeholder="Any special requirements or notes..."
               />
@@ -541,25 +424,28 @@ export default function CartPage() {
               Choose which items to include in your requisition
             </Text>
 
-            {cartItemsCart.length > 0 && (
+            {products.length > 0 && (
               <>
                 <Text fw={600} size="sm">
                   Inventory Items
                 </Text>
                 <Stack gap="xs">
-                  {cartItemsCart.map((item) => (
-                    <Paper key={item.id} p="sm" withBorder>
+                  {products.map((item) => (
+                    <Paper key={item.product.id} p="sm" withBorder>
                       <Group justify="space-between">
                         <div>
                           <Text size="sm" fw={500}>
-                            {item.name}
+                            {item.product.name}
                           </Text>
                           <Text size="xs" c="dimmed">
                             Qty: {item.quantity}
                           </Text>
                         </div>
                         <Text size="sm" fw={600}>
-                          KES {(item.price * item.quantity).toLocaleString()}
+                          KES{" "}
+                          {(
+                            item.product.base_price * item.quantity
+                          ).toLocaleString()}
                         </Text>
                       </Group>
                     </Paper>
@@ -568,11 +454,9 @@ export default function CartPage() {
               </>
             )}
 
-            {cartItemsCart.length > 0 && nonTangibleCartItems.length > 0 && (
-              <Divider />
-            )}
+            {products.length > 0 && services.length > 0 && <Divider />}
 
-            {nonTangibleCartItems.length > 0 && (
+            {services.length > 0 && (
               <>
                 <Group justify="space-between" align="center">
                   <Text fw={600} size="sm">
@@ -589,21 +473,25 @@ export default function CartPage() {
                   </Button>
                 </Group>
                 <Stack gap="xs">
-                  {nonTangibleCartItems.map((item) => (
-                    <Paper key={item.id} p="sm" withBorder>
+                  {services.map((item) => (
+                    <Paper key={item.service.id} p="sm" withBorder>
                       <Group justify="space-between">
                         <Group>
                           <Checkbox
-                            checked={selectedService === item.id}
+                            checked={
+                              selectedService === item.service.id.toString()
+                            }
                             onChange={() => {
                               setSelectedService(
-                                selectedService === item.id ? "" : item.id,
+                                selectedService === item.service.id.toString()
+                                  ? ""
+                                  : item.service.id.toString(),
                               );
                             }}
                           />
                           <div>
                             <Text size="sm" fw={500}>
-                              {item.name}
+                              {item.service.name}
                             </Text>
                             <Text size="xs" c="dimmed">
                               Qty: {item.quantity}
@@ -611,7 +499,10 @@ export default function CartPage() {
                           </div>
                         </Group>
                         <Text size="sm" fw={600}>
-                          KES {(item.price * item.quantity).toLocaleString()}
+                          KES{" "}
+                          {(
+                            item.service.base_price * item.quantity
+                          ).toLocaleString()}
                         </Text>
                       </Group>
                     </Paper>
@@ -629,7 +520,6 @@ export default function CartPage() {
               </Button>
               <Button
                 onClick={() => {
-                  // Navigate with all items
                   window.location.href = "/application/requisitions/new";
                 }}
               >
@@ -639,7 +529,6 @@ export default function CartPage() {
                 variant="filled"
                 disabled={!selectedService}
                 onClick={() => {
-                  // Navigate with selected service
                   window.location.href = "/application/requisitions/new";
                 }}
               >
