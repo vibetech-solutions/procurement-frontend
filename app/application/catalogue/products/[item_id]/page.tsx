@@ -4,7 +4,7 @@ import { ContentContainer } from "@/components/layout/content-container";
 import { getProduct } from "@/lib/redux/features/products/productsSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import { categoryColors } from "@/lib/utils/constants";
-import { getInitials } from "@/lib/utils/helpers";
+import { getInitials, resolveImageUrl } from "@/lib/utils/helpers";
 import {
   Anchor,
   ActionIcon,
@@ -43,17 +43,6 @@ import {
   taxStatusColor,
   taxStatusLabel,
 } from "@/components/shared/catalogue/services/utils/constants";
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-function resolveImageUrl(path: string | null | undefined): string {
-  if (!path) return "/placeholder.svg";
-  if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  const base =
-    process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ??
-    "http://localhost:8000";
-  return `${base}/storage/${path.replace(/^storage\//, "")}`;
-}
 
 function FieldRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (

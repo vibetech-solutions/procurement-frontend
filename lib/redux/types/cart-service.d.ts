@@ -1,4 +1,5 @@
 type CartService = {
-  service: Service;
+  service: service_fields;
   quantity: number;
+  custom_values: CustomFieldValue[];
 };

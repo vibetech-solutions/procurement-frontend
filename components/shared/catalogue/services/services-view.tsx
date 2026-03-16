@@ -1,6 +1,8 @@
 "use client";
 
-import { useAppSelector } from "@/lib/redux/hooks";
+import { addServiceToCart } from "@/lib/redux/features/services/cart/cartSlice";
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import { notifications } from "@mantine/notifications";
 import { categoryColors } from "@/lib/utils/constants";
 import {
   ActionIcon,
@@ -26,6 +28,11 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import ServiceGridCard from "./service-grid-card";
 import { categoryIcons } from "@/lib/utils/component-constants";
+import AddToCartModal from "./add-to-cart-modal";
+
+interface ServicesViewProps {
+  onView?: (id: number) => void;
+}
 
 interface ServicesViewProps {
   onView?: (id: number) => void;
@@ -56,9 +63,15 @@ function taxStatusLabel(status: string) {
 
 const ServicesView = ({ onView }: ServicesViewProps) => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [addToCartModalOpened, setAddToCartModalOpened] = useState(false);
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const { services } = useAppSelector((state) => state.services);
+  const { servicesLoading: cartLoading } = useAppSelector(
+    (state) => state.services_cart,
+  );
 
   const handleView = (id: number) => {
     if (onView) {
@@ -66,6 +79,38 @@ const ServicesView = ({ onView }: ServicesViewProps) => {
     } else {
       router.push(`/application/catalogue/services/${id}`);
     }
+  };
+
+  const handleAddToCart = async (
+    service: Service,
+    quantity: number,
+    customValues: CustomFieldValue[],
+  ) => {
+    try {
+      await dispatch(
+        addServiceToCart({
+          service_id: service.id,
+          quantity,
+          custom_values: customValues,
+        }),
+      ).unwrap();
+      notifications.show({
+        title: "Added to Cart",
+        message: `${service.name} added successfully`,
+        color: "green",
+      });
+    } catch (error: any) {
+      notifications.show({
+        title: "Cart Error",
+        message: error?.message || "Failed to add service to cart",
+        color: "red",
+      });
+    }
+  };
+
+  const handleAddToCartClick = (service: Service) => {
+    setSelectedService(service);
+    setAddToCartModalOpened(true);
   };
 
   return (
@@ -106,7 +151,12 @@ const ServicesView = ({ onView }: ServicesViewProps) => {
               <Grid gutter="md">
                 {services.map((service) => (
                   <Grid.Col key={service.id} span={{ base: 12, sm: 6, lg: 4 }}>
-                    <ServiceGridCard service={service} onView={handleView} />
+                    <ServiceGridCard
+                      service={service}
+                      onView={handleView}
+                      onAddToCart={handleAddToCartClick}
+                      loading={cartLoading}
+                    />
                   </Grid.Col>
                 ))}
               </Grid>
@@ -289,6 +339,14 @@ const ServicesView = ({ onView }: ServicesViewProps) => {
           </Card>
         )}
       </Stack>
+
+      <AddToCartModal
+        opened={addToCartModalOpened}
+        onClose={() => setAddToCartModalOpened(false)}
+        service={selectedService}
+        onAddToCart={handleAddToCart}
+        loading={cartLoading}
+      />
     </Grid.Col>
   );
 };

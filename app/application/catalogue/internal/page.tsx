@@ -93,7 +93,6 @@ export default function InternalCatalogPage() {
             <ProductsView
               viewMode={viewMode}
               setViewMode={setViewMode}
-              activeTab={activeTab!}
               pagination={pagination}
             />
           )}

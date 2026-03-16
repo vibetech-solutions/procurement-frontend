@@ -16,8 +16,6 @@ const ServiceCategoriesTable = ({
     (state) => state.service_categories,
   );
 
-  console.log("KATEGORIS", categories);
-
   useEffect(() => {
     dispatch(fetchServiceCategories(1));
   }, [dispatch]);

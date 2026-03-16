@@ -186,3 +186,12 @@ export function objectToFormData(
 
   return form;
 }
+
+export function resolveImageUrl(path: string | null | undefined): string {
+  if (!path) return "/placeholder.svg";
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  const base =
+    process.env.NEXT_PUBLIC_BACKEND_API_URL?.replace(/\/$/, "") ??
+    "http://localhost:8000";
+  return `${base}/storage/${path.replace(/^storage\//, "")}`;
+}

@@ -1,4 +1,4 @@
 type CartProduct = {
-  product: Product;
+  product_id: number;
   quantity: number;
 };
