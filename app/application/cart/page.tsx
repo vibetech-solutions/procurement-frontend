@@ -33,7 +33,7 @@ export default function CartPage() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [proceedModalOpen, setProceedModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<CartService | null>(null);
-  const [editFormData, setEditFormData] = useState<Record<string, any>>({});
+  const [editFormData, setEditFormData] = useState<Record<string, CustomFieldValueType>>({});
   const [editQuantity, setEditQuantity] = useState(1);
   const dispatch = useAppDispatch();
 
@@ -49,7 +49,7 @@ export default function CartPage() {
   useEffect(() => {
     if (selectedItem) {
       setEditQuantity(selectedItem.quantity);
-      const record: Record<string, any> = {};
+      const record: Record<string, CustomFieldValueType> = {};
       (selectedItem.custom_values ?? []).forEach(({ field_id, value }) => {
         record[field_id] = value;
       });
@@ -66,19 +66,19 @@ export default function CartPage() {
       setSelectedProductIds(new Set(products.map((p) => p.product_id)));
       setSelectedServiceIds(new Set(services.map((s) => s.service_id)));
     }
-  }, [proceedModalOpen]);
+  }, [proceedModalOpen, products, services]);
 
   const toggleProduct = (id: number) =>
     setSelectedProductIds((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) { next.delete(id); } else { next.add(id); }
       return next;
     });
 
   const toggleService = (id: number) =>
     setSelectedServiceIds((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) { next.delete(id); } else { next.add(id); }
       return next;
     });
 
@@ -87,13 +87,13 @@ export default function CartPage() {
       .filter((p) => selectedProductIds.has(p.product_id))
       .reduce((sum, p) => {
         const d = productDetails[p.product_id];
-        return sum + (d ? computeSubtotal(d as any) * p.quantity : 0);
+        return sum + (d ? computeSubtotal(d) * p.quantity : 0);
       }, 0) +
     services
       .filter((s) => selectedServiceIds.has(s.service_id))
       .reduce((sum, s) => {
         const d = serviceDetails[s.service_id];
-        return sum + (d ? computeSubtotal(d as any) * s.quantity : 0);
+        return sum + (d ? computeSubtotal(d) * s.quantity : 0);
       }, 0);
 
   const selectedTax =
@@ -101,13 +101,13 @@ export default function CartPage() {
       .filter((p) => selectedProductIds.has(p.product_id))
       .reduce((sum, p) => {
         const d = productDetails[p.product_id];
-        return sum + (d ? computeTax(d as any) * p.quantity : 0);
+        return sum + (d ? computeTax(d) * p.quantity : 0);
       }, 0) +
     services
       .filter((s) => selectedServiceIds.has(s.service_id))
       .reduce((sum, s) => {
         const d = serviceDetails[s.service_id];
-        return sum + (d ? computeTax(d as any) * s.quantity : 0);
+        return sum + (d ? computeTax(d) * s.quantity : 0);
       }, 0);
 
   const selectedCount = selectedProductIds.size + selectedServiceIds.size;
@@ -115,25 +115,25 @@ export default function CartPage() {
   const productSubtotal = products.reduce((sum, item) => {
     const product = productDetails[item.product_id];
     if (!product) return sum;
-    return sum + computeSubtotal(product as any) * item.quantity;
+    return sum + computeSubtotal(product) * item.quantity;
   }, 0);
 
   const productTax = products.reduce((sum, item) => {
     const product = productDetails[item.product_id];
     if (!product) return sum;
-    return sum + computeTax(product as any) * item.quantity;
+    return sum + computeTax(product) * item.quantity;
   }, 0);
 
   const serviceSubtotal = services.reduce((sum, item) => {
     const service = serviceDetails[item.service_id];
     if (!service) return sum;
-    return sum + computeSubtotal(service as any) * item.quantity;
+    return sum + computeSubtotal(service) * item.quantity;
   }, 0);
 
   const serviceTax = services.reduce((sum, item) => {
     const service = serviceDetails[item.service_id];
     if (!service) return sum;
-    return sum + computeTax(service as any) * item.quantity;
+    return sum + computeTax(service) * item.quantity;
   }, 0);
 
   const subtotal = productSubtotal + serviceSubtotal;
@@ -241,8 +241,8 @@ export default function CartPage() {
                       <Text size="sm" c="dimmed" ta="center" py="md">No products in cart.</Text>
                     ) : products.map((item) => {
                       const p = productDetails[item.product_id];
-                      const taxAmt = p ? computeTax(p as any) * item.quantity : 0;
-                      const lineTotal = p ? computeTotal(p as any) * item.quantity : 0;
+                      const taxAmt = p ? computeTax(p) * item.quantity : 0;
+                      const lineTotal = p ? computeTotal(p) * item.quantity : 0;
                       const isTaxable = p?.sellable?.tax_status === "taxable" && taxAmt > 0;
                       const isInclusive = p?.sellable?.tax_type === "inclusive";
                       return (
@@ -279,8 +279,8 @@ export default function CartPage() {
                       <Text size="sm" c="dimmed" ta="center" py="md">No services in cart.</Text>
                     ) : services.map((item) => {
                       const s = serviceDetails[item.service_id];
-                      const taxAmt = s ? computeTax(s as any) * item.quantity : 0;
-                      const lineTotal = s ? computeTotal(s as any) * item.quantity : 0;
+                      const taxAmt = s ? computeTax(s) * item.quantity : 0;
+                      const lineTotal = s ? computeTotal(s) * item.quantity : 0;
                       const isTaxable = s?.sellable?.tax_status === "taxable" && taxAmt > 0;
                       const isInclusive = s?.sellable?.tax_type === "inclusive";
                       return (

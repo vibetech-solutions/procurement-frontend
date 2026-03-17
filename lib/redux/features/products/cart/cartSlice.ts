@@ -13,7 +13,7 @@ const initialState: ProductCartState = {
 export const getCartProducts = createAsyncThunk<
   CartProduct[],
   void,
-  { rejectValue: any }
+  { rejectValue: string }
 >("productsCart/getCartProducts", async (_, { rejectWithValue }) => {
   try {
     await clientaxiosinstance.get("/sanctum/csrf-cookie");
@@ -30,7 +30,7 @@ export const getCartProducts = createAsyncThunk<
 export const getCartProduct = createAsyncThunk<
   { product_id: number; product: Product },
   number,
-  { rejectValue: any }
+  { rejectValue: string }
 >("productsCart/getCartProduct", async (product_id, { rejectWithValue }) => {
   try {
     await clientaxiosinstance.get("/sanctum/csrf-cookie");
@@ -47,7 +47,7 @@ export const getCartProduct = createAsyncThunk<
 export const addProductToCart = createAsyncThunk<
   CartProduct[],
   CartProduct,
-  { rejectValue: any }
+  { rejectValue: string }
 >("productsCart/addProductToCart", async (cartProduct: CartProduct, { rejectWithValue }) => {
   try {
     await clientaxiosinstance.get("/sanctum/csrf-cookie");
@@ -66,7 +66,7 @@ export const addProductToCart = createAsyncThunk<
 export const updateCartProductQuantity = createAsyncThunk<
   CartProduct[],
   CartProduct,
-  { rejectValue: any }
+  { rejectValue: string }
 >("productsCart/updateCartProductQuantity", async (cartProduct, { rejectWithValue }) => {
   try {
     await clientaxiosinstance.get("/sanctum/csrf-cookie");
@@ -83,7 +83,7 @@ export const updateCartProductQuantity = createAsyncThunk<
 export const removeCartProduct = createAsyncThunk<
   CartProduct[],
   number,
-  { rejectValue: any }
+  { rejectValue: string }
 >("productsCart/removeCartProduct", async (product_id, { rejectWithValue }) => {
   try {
     await clientaxiosinstance.get("/sanctum/csrf-cookie");
@@ -99,7 +99,7 @@ export const removeCartProduct = createAsyncThunk<
   }
 });
 
-export const clearCart = createAsyncThunk<void, void, { rejectValue: any }>(
+export const clearCart = createAsyncThunk<void, void, { rejectValue: string }>(
   "productsCart/clearCart",
   async (_, { rejectWithValue }) => {
     try {

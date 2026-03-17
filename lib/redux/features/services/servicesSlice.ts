@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import clientaxiosinstance from "@/lib/services/clientaxiosinstance";
 import axios from "axios";
-import { ServicesState } from "../../types/services-state";
 
 const initialState: ServicesState = {
   services: [],
@@ -111,7 +110,7 @@ export const getService = createAsyncThunk(
 
       const response = await clientaxiosinstance.get(`/services/${item_id}`);
 
-      return response.data;
+      return response.data as service_fields;
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response) {
         return rejectWithValue(error.response.data);

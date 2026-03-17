@@ -14,7 +14,7 @@ const initialState: ServiceCartState = {
 export const getCartServices = createAsyncThunk<
   RawCartService[],
   void,
-  { rejectValue: any }
+  { rejectValue: string }
 >("servicesCart/getCartServices", async (_, { rejectWithValue }) => {
   try {
     await clientaxiosinstance.get("/sanctum/csrf-cookie");
@@ -31,7 +31,7 @@ export const getCartServices = createAsyncThunk<
 export const getCartService = createAsyncThunk<
   { service_id: number; service: service_fields },
   number,
-  { rejectValue: any }
+  { rejectValue: string }
 >("servicesCart/getCartService", async (service_id, { rejectWithValue }) => {
   try {
     await clientaxiosinstance.get("/sanctum/csrf-cookie");
@@ -48,7 +48,7 @@ export const getCartService = createAsyncThunk<
 export const addServiceToCart = createAsyncThunk<
   RawCartService[],
   { service_id: number; quantity: number; custom_values: CustomFieldValue[] },
-  { rejectValue: any }
+  { rejectValue: string }
 >("servicesCart/addServiceToCart", async (payload, { rejectWithValue }) => {
   try {
     await clientaxiosinstance.get("/sanctum/csrf-cookie");
@@ -65,7 +65,7 @@ export const addServiceToCart = createAsyncThunk<
 export const updateCartService = createAsyncThunk<
   RawCartService[],
   { service_id: number; quantity: number; custom_values: CustomFieldValue[] },
-  { rejectValue: any }
+  { rejectValue: string }
 >("servicesCart/updateCartService", async (payload, { rejectWithValue }) => {
   try {
     await clientaxiosinstance.get("/sanctum/csrf-cookie");
@@ -82,7 +82,7 @@ export const updateCartService = createAsyncThunk<
 export const updateCartServiceQuantity = createAsyncThunk<
   RawCartService[],
   { service_id: number; quantity: number },
-  { rejectValue: any }
+  { rejectValue: string }
 >("servicesCart/updateCartServiceQuantity", async (payload, { rejectWithValue }) => {
   try {
     await clientaxiosinstance.get("/sanctum/csrf-cookie");
@@ -99,7 +99,7 @@ export const updateCartServiceQuantity = createAsyncThunk<
 export const removeCartService = createAsyncThunk<
   RawCartService[],
   number,
-  { rejectValue: any }
+  { rejectValue: string }
 >("servicesCart/removeCartService", async (service_id, { rejectWithValue }) => {
   try {
     await clientaxiosinstance.get("/sanctum/csrf-cookie");

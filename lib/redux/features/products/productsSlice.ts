@@ -1,5 +1,4 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { ProductsState } from "../../types/products-state";
 import clientaxiosinstance from "@/lib/services/clientaxiosinstance";
 import axios from "axios";
 
@@ -112,7 +111,7 @@ export const getProduct = createAsyncThunk(
 
       const response = await clientaxiosinstance.get(`/products/${item_id}`);
 
-      return response.data;
+      return response.data as Product;
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response) {
         return rejectWithValue(error.response.data);

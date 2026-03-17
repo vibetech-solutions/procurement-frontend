@@ -24,7 +24,6 @@ import {
   Tabs,
   Loader,
   FileInput,
-  ScrollArea,
 } from "@mantine/core";
 import { RichTextEditor } from "@mantine/tiptap";
 import { useEditor } from "@tiptap/react";
@@ -102,7 +101,7 @@ export default function CheckoutPage() {
         dispatch(getCartProduct(item.product_id));
       }
     });
-  }, [cartProducts]);
+  }, [cartProducts, dispatch, productDetails]);
 
   useEffect(() => {
     cartServices.forEach((item) => {
@@ -110,7 +109,7 @@ export default function CheckoutPage() {
         dispatch(getCartService(item.service_id));
       }
     });
-  }, [cartServices]);
+  }, [cartServices, dispatch, serviceDetails]);
 
   useEffect(() => {
     const productItems = cartProducts.map((item) => {
@@ -146,7 +145,7 @@ export default function CheckoutPage() {
 
   const [internalSearch, setInternalSearch] = useState("");
   const [selectedInternalItem, setSelectedInternalItem] = useState<{ id: number; type: "product" | "service" } | null>(null);
-  const [customFieldValues, setCustomFieldValues] = useState<Record<string, any>>({});
+  const [customFieldValues, setCustomFieldValues] = useState<Record<string, CustomFieldValueType>>({});
   const [activeModalTab, setActiveModalTab] = useState<string | null>("new");
 
   const [active, setActive] = useState(0);
@@ -166,7 +165,7 @@ export default function CheckoutPage() {
       setItemQuantity(1);
       setActiveModalTab("new");
     }
-  }, [addItemModalOpen]);
+  }, [addItemModalOpen, dispatch]);
   const [selectedCatalogueItem, setSelectedCatalogueItem] = useState<
     string | null
   >(null);
@@ -234,44 +233,6 @@ export default function CheckoutPage() {
     { value: "PROJ-2025-005", label: "Employee Wellness Program" },
   ];
 
-  const catalogueItems = [
-    {
-      value: "CAT-001",
-      label: "Ergonomic Office Chair",
-      price: 38999,
-      category: "Furniture",
-      inStock: true,
-    },
-    {
-      value: "CAT-002",
-      label: "Laptop - Dell XPS 15",
-      price: 194999,
-      category: "IT Equipment",
-      inStock: true,
-    },
-    {
-      value: "CAT-003",
-      label: "Printer Paper (500 sheets)",
-      price: 1689,
-      category: "Office Supplies",
-      inStock: true,
-    },
-    {
-      value: "CAT-004",
-      label: "Standing Desk",
-      price: 77999,
-      category: "Furniture",
-      inStock: false,
-    },
-    {
-      value: "CAT-005",
-      label: "Wireless Mouse",
-      price: 3899,
-      category: "IT Equipment",
-      inStock: true,
-    },
-  ];
-
   const selectedUser = users.find((user) => user.value === selectedReceiver);
 
   const updateItemQuantity = async (id: string, quantity: number) => {
@@ -334,7 +295,7 @@ export default function CheckoutPage() {
   const [editServiceModalOpen, setEditServiceModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<CartService | null>(null);
   const [editServiceQuantity, setEditServiceQuantity] = useState(1);
-  const [editServiceFormData, setEditServiceFormData] = useState<Record<string, any>>({});
+  const [editServiceFormData, setEditServiceFormData] = useState<Record<string, CustomFieldValueType>>({});
   const [editServiceLoading, setEditServiceLoading] = useState(false);
 
   const addItem = async () => {
@@ -387,22 +348,22 @@ export default function CheckoutPage() {
   const subtotal = [
     ...cartProducts.map((item) => {
       const p = productDetails[item.product_id];
-      return p ? computeTotal(p as any) * item.quantity : 0;
+      return p ? computeTotal(p) * item.quantity : 0;
     }),
     ...cartServices.map((item) => {
       const s = serviceDetails[item.service_id];
-      return s ? computeTotal(s as any) * item.quantity : 0;
+      return s ? computeTotal(s) * item.quantity : 0;
     }),
   ].reduce((a, b) => a + b, 0);
 
   const tax = [
     ...cartProducts.map((item) => {
       const p = productDetails[item.product_id];
-      return p ? computeTax(p as any) * item.quantity : 0;
+      return p ? computeTax(p) * item.quantity : 0;
     }),
     ...cartServices.map((item) => {
       const s = serviceDetails[item.service_id];
-      return s ? computeTax(s as any) * item.quantity : 0;
+      return s ? computeTax(s) * item.quantity : 0;
     }),
   ].reduce((a, b) => a + b, 0);
 
@@ -884,8 +845,8 @@ export default function CheckoutPage() {
                               const p = productDetails[raw.product_id];
                               const id = `product-${raw.product_id}`;
                               const base = p ? Number(p.base_price) : 0;
-                              const taxAmt = p ? computeTax(p as any) : 0;
-                              const lineTotal = p ? computeTotal(p as any) * raw.quantity : 0;
+                              const taxAmt = p ? computeTax(p) : 0;
+                              const lineTotal = p ? computeTotal(p) * raw.quantity : 0;
                               const isInclusive = p?.sellable?.tax_type === "inclusive";
                               const isTaxable = p?.sellable?.tax_status === "taxable" && taxAmt > 0;
                               return (
@@ -950,8 +911,8 @@ export default function CheckoutPage() {
                               const s = serviceDetails[raw.service_id];
                               const id = `service-${raw.service_id}`;
                               const base = s ? Number(s.base_price) : 0;
-                              const taxAmt = s ? computeTax(s as any) : 0;
-                              const lineTotal = s ? computeTotal(s as any) * raw.quantity : 0;
+                              const taxAmt = s ? computeTax(s) : 0;
+                              const lineTotal = s ? computeTotal(s) * raw.quantity : 0;
                               const isInclusive = s?.sellable?.tax_type === "inclusive";
                               const isTaxable = s?.sellable?.tax_status === "taxable" && taxAmt > 0;
                               const hasCustomFields = (s?.category?.custom_fields?.length ?? 0) > 0;
@@ -963,7 +924,7 @@ export default function CheckoutPage() {
                                     if (!s || !hasCustomFields) return;
                                     setEditingService({ service: s, quantity: raw.quantity, custom_values: raw.custom_values ?? [] });
                                     setEditServiceQuantity(raw.quantity);
-                                    const record: Record<string, any> = {};
+                                    const record: Record<string, CustomFieldValueType> = {};
                                     (raw.custom_values ?? []).forEach(({ field_id, value }) => { record[field_id] = value; });
                                     setEditServiceFormData(record);
                                     setEditServiceModalOpen(true);
@@ -1742,8 +1703,8 @@ export default function CheckoutPage() {
                       </Table.Thead>
                       <Table.Tbody>
                         {catalogueProducts
-                          .filter((p) => p.name.toLowerCase().includes(internalSearch.toLowerCase()))
-                          .map((p) => (
+                          .filter((p: Product) => p.name.toLowerCase().includes(internalSearch.toLowerCase()))
+                          .map((p: Product) => (
                             <Table.Tr
                               key={p.id}
                               style={{
@@ -1791,8 +1752,8 @@ export default function CheckoutPage() {
                       </Table.Thead>
                       <Table.Tbody>
                         {catalogueServices
-                          .filter((s) => s.name.toLowerCase().includes(internalSearch.toLowerCase()))
-                          .map((s) => (
+                          .filter((s: Service) => s.name.toLowerCase().includes(internalSearch.toLowerCase()))
+                          .map((s: Service) => (
                             <Table.Tr
                               key={s.id}
                               style={{
@@ -1831,7 +1792,7 @@ export default function CheckoutPage() {
                   />
                   {(() => {
                     if (selectedInternalItem.type !== "service") return null;
-                    const svc = catalogueServices.find((s) => s.id === selectedInternalItem.id);
+                    const svc = catalogueServices.find((s: Service) => s.id === selectedInternalItem.id);
                     const fields = svc?.category?.custom_fields;
                     if (!fields?.length) return null;
                     return (

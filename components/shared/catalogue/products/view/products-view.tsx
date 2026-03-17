@@ -39,10 +39,10 @@ const ProductsView = ({
         message: "Item added successfully",
         color: "green",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       notifications.show({
         title: "Cart Error",
-        message: error?.message || "Failed to add item to cart",
+        message: (error as { message?: string })?.message || "Failed to add item to cart",
         color: "red",
       });
     }

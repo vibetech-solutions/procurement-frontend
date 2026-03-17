@@ -49,9 +49,9 @@ const ProductView = ({ item }: { item: CartProduct }) => {
 
   if (productLoading || !product) return <ProductViewSkeleton />;
 
-  const unitTotal = computeTotal(product as any);
-  const taxAmount = computeTax(product as any);
-  const unitSubtotal = computeSubtotal(product as any);
+  const unitTotal = computeTotal(product);
+  const taxAmount = computeTax(product);
+  const unitSubtotal = computeSubtotal(product);
   const isInclusive = product.sellable?.tax_type === "inclusive";
   const isTaxable = product.sellable?.tax_status === "taxable" && taxAmount > 0;
 

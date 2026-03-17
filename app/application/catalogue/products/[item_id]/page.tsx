@@ -35,6 +35,7 @@ import {
   IconUsers,
 } from "@tabler/icons-react";
 import { use, useEffect } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   computeTax,
@@ -124,11 +125,11 @@ export default function CatalogueItem({ params }: CatalogueItemProps) {
       ? (product.category as { name: string }).name
       : String(product.category ?? "");
 
-  const color = categoryColors[product.category as any] ?? "blue";
+  const color = categoryColors[product.category?.name ?? ""] ?? "blue";
   const imageUrl = resolveImageUrl(product.image);
-  const taxAmount = product.sellable ? computeTax(product as any) : 0;
+  const taxAmount = product.sellable ? computeTax(product) : 0;
   const totalPrice = product.sellable
-    ? computeTotal(product as any)
+    ? computeTotal(product)
     : Number(product.base_price);
   const isInclusive = product.sellable?.tax_type === "inclusive";
   const basePrice = Number(product.base_price);
@@ -239,20 +240,15 @@ export default function CatalogueItem({ params }: CatalogueItemProps) {
                     padding={0}
                     style={{ overflow: "hidden" }}
                   >
-                    <img
-                      src={imageUrl}
-                      alt={product.name}
-                      style={{
-                        width: "100%",
-                        height: 340,
-                        objectFit: "cover",
-                        display: "block",
-                      }}
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src =
-                          "/placeholder.svg";
-                      }}
-                    />
+                    <div style={{ position: "relative", width: "100%", height: 340 }}>
+                      <Image
+                        src={imageUrl}
+                        alt={product.name}
+                        fill
+                        unoptimized
+                        style={{ objectFit: "cover" }}
+                      />
+                    </div>
                   </Card>
 
                   <Card withBorder radius="md" padding="lg">
@@ -290,7 +286,7 @@ export default function CatalogueItem({ params }: CatalogueItemProps) {
                     />
                     <FieldRow
                       label="Created"
-                      value={new Date(product.created_at).toLocaleDateString(
+                      value={new Date(product.created_at!).toLocaleDateString(
                         "en-KE",
                         {
                           day: "numeric",
@@ -301,7 +297,7 @@ export default function CatalogueItem({ params }: CatalogueItemProps) {
                     />
                     <FieldRow
                       label="Last updated"
-                      value={new Date(product.updated_at).toLocaleDateString(
+                      value={new Date(product.updated_at!).toLocaleDateString(
                         "en-KE",
                         {
                           day: "numeric",

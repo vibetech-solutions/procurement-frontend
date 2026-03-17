@@ -324,3 +324,7 @@
 //     </ContentContainer>
 //   );
 // }
+
+export default function NonTangibleDetailPage() {
+  return null;
+}

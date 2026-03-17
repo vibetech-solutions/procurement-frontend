@@ -13,8 +13,8 @@ import React from "react";
 
 interface CustomFieldsFormProps {
   customFields: CustomField[];
-  formData: Record<string, any>;
-  setFormData: (data: Record<string, any>) => void;
+  formData: Record<string, CustomFieldValueType>;
+  setFormData: (data: Record<string, CustomFieldValueType>) => void;
   errors?: Record<string, string>;
 }
 
@@ -24,7 +24,7 @@ const CustomFieldsForm: React.FC<CustomFieldsFormProps> = ({
   setFormData,
   errors = {},
 }) => {
-  const handleChange = (id: string, value: any) => {
+  const handleChange = (id: string, value: CustomFieldValueType) => {
     setFormData({
       ...formData,
       [id]: value,
@@ -48,7 +48,7 @@ const CustomFieldsForm: React.FC<CustomFieldsFormProps> = ({
           <TextInput
             key={field.id}
             {...commonProps}
-            value={value}
+            value={value as string}
             onChange={(e) => handleChange(field.id, e.target.value)}
           />
         );
@@ -57,7 +57,7 @@ const CustomFieldsForm: React.FC<CustomFieldsFormProps> = ({
           <Textarea
             key={field.id}
             {...commonProps}
-            value={value}
+            value={value as string}
             onChange={(e) => handleChange(field.id, e.target.value)}
           />
         );
@@ -66,7 +66,7 @@ const CustomFieldsForm: React.FC<CustomFieldsFormProps> = ({
           <NumberInput
             key={field.id}
             {...commonProps}
-            value={value}
+            value={value as string | number}
             onChange={(val) => handleChange(field.id, val)}
             min={field.min}
             max={field.max}
@@ -78,7 +78,7 @@ const CustomFieldsForm: React.FC<CustomFieldsFormProps> = ({
           <NumberInput
             key={field.id}
             {...commonProps}
-            value={value}
+            value={value as string | number}
             onChange={(val) => handleChange(field.id, val)}
             min={field.min}
             max={field.max}
@@ -90,9 +90,9 @@ const CustomFieldsForm: React.FC<CustomFieldsFormProps> = ({
           <DatePickerInput
             key={field.id}
             {...commonProps}
-            value={value ? new Date(value) : null}
+            value={value ? new Date(value as string | number) : null}
             onChange={(date) =>
-              handleChange(field.id, date?.toString().split("T")[0])
+              handleChange(field.id, date?.toString().split("T")[0] ?? "")
             }
             popoverProps={{ withinPortal: true, zIndex: 1000 }}
           />
@@ -102,7 +102,7 @@ const CustomFieldsForm: React.FC<CustomFieldsFormProps> = ({
           <TimeInput
             key={field.id}
             {...commonProps}
-            value={value}
+            value={value as string}
             onChange={(e) => handleChange(field.id, e.target.value)}
           />
         );
@@ -111,8 +111,8 @@ const CustomFieldsForm: React.FC<CustomFieldsFormProps> = ({
           <DateTimePicker
             key={field.id}
             {...commonProps}
-            value={value ? new Date(value) : null}
-            onChange={(date) => handleChange(field.id, date?.toString())}
+            value={value ? new Date(value as string | number) : null}
+            onChange={(date) => handleChange(field.id, date?.toString() ?? "")}
             popoverProps={{ withinPortal: true, zIndex: 1000 }}
           />
         );
@@ -121,7 +121,7 @@ const CustomFieldsForm: React.FC<CustomFieldsFormProps> = ({
           <Select
             key={field.id}
             {...commonProps}
-            value={value}
+            value={value as string}
             onChange={(val) => handleChange(field.id, val)}
             data={field.options || []}
           />
@@ -141,7 +141,7 @@ const CustomFieldsForm: React.FC<CustomFieldsFormProps> = ({
           <Checkbox
             key={field.id}
             {...commonProps}
-            checked={value}
+            checked={value as boolean}
             onChange={(e) => handleChange(field.id, e.target.checked)}
             label={field.label}
           />
@@ -151,7 +151,7 @@ const CustomFieldsForm: React.FC<CustomFieldsFormProps> = ({
           <Textarea
             key={field.id}
             {...commonProps}
-            value={value}
+            value={value as string}
             onChange={(e) => handleChange(field.id, e.target.value)}
           />
         );
@@ -160,7 +160,7 @@ const CustomFieldsForm: React.FC<CustomFieldsFormProps> = ({
           <TextInput
             key={field.id}
             {...commonProps}
-            value={value}
+            value={value as string}
             onChange={(e) => handleChange(field.id, e.target.value)}
           />
         );

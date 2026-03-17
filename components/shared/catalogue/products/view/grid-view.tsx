@@ -59,7 +59,7 @@ const ProductGridView = ({
       />
 
       <Grid gutter="md">
-        {products.map((item) => (
+        {products.map((item: Product) => (
           <Grid.Col key={item.id} span={{ base: 12, sm: 6, lg: 4 }}>
             <Card shadow="sm" padding="lg" radius="md" withBorder h="100%">
               <Card.Section style={{ position: "relative" }}>

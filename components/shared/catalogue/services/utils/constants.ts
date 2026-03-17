@@ -29,7 +29,9 @@ export function taxStatusLabel(status: string) {
  *   exclusive → base_price + taxAmount
  *   inclusive → base_price  (tax already included)
  */
-export function computeTax(service: Service): number {
+type SellableItem = { base_price: number; sellable?: Sellable };
+
+export function computeTax(service: SellableItem): number {
   const { sellable } = service;
   if (!sellable || sellable.tax_status !== "taxable" || !sellable.tax_value)
     return 0;
@@ -53,7 +55,7 @@ export function computeTax(service: Service): number {
  * - Exclusive: subtotal = base_price (tax is on top)
  * - Inclusive: subtotal = base_price - tax (tax is baked in)
  */
-export function computeSubtotal(service: Service): number {
+export function computeSubtotal(service: SellableItem): number {
   const base = Number(service.base_price);
   const { sellable } = service;
   if (!sellable || sellable.tax_status !== "taxable" || !sellable.tax_value)
@@ -69,7 +71,7 @@ export function computeSubtotal(service: Service): number {
  * - Exclusive: total = base_price + tax
  * - Inclusive: total = base_price (tax already inside)
  */
-export function computeTotal(service: Service): number {
+export function computeTotal(service: SellableItem): number {
   const { sellable } = service;
   const base = Number(service.base_price);
   if (!sellable || sellable.tax_status !== "taxable" || !sellable.tax_value)

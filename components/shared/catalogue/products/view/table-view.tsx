@@ -60,7 +60,7 @@ const ProductTableView = ({
         </Table.Thead>
 
         <Table.Tbody>
-          {products.map((item) => (
+          {products.map((item: Product) => (
             <React.Fragment key={item.id}>
               <Table.Tr>
                 <Table.Td>

@@ -38,7 +38,7 @@ interface ServicesViewProps {
   onView?: (id: number) => void;
 }
 
-function getSupplierName(supplier: any): string {
+function getSupplierName(supplier: User): string {
   return (
     supplier?.supplier_trading_name ||
     supplier?.company_name ||
@@ -99,10 +99,10 @@ const ServicesView = ({ onView }: ServicesViewProps) => {
         message: `${service.name} added successfully`,
         color: "green",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       notifications.show({
         title: "Cart Error",
-        message: error?.message || "Failed to add service to cart",
+        message: (error as { message?: string })?.message || "Failed to add service to cart",
         color: "red",
       });
     }
@@ -149,7 +149,7 @@ const ServicesView = ({ onView }: ServicesViewProps) => {
               <EmptyState />
             ) : (
               <Grid gutter="md">
-                {services.map((service) => (
+                {services.map((service: Service) => (
                   <Grid.Col key={service.id} span={{ base: 12, sm: 6, lg: 4 }}>
                     <ServiceGridCard
                       service={service}
@@ -208,9 +208,8 @@ const ServicesView = ({ onView }: ServicesViewProps) => {
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
-                  {services.map((service) => {
-                    const color =
-                      categoryColors[service.category?.name] ?? "gray";
+                  {services.map((service: Service) => {
+                    const color = categoryColors[service.category?.name] ?? "gray";
                     const primarySupplier = service.sellable?.suppliers?.[0];
                     const taxStatus = service.sellable?.tax_status;
                     // tax rate comes from the eager-loaded Tax model, or falls

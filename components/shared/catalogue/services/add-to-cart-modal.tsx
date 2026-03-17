@@ -7,8 +7,8 @@ import CustomFieldsForm from "../custom-fields-form";
 interface AddToCartModalProps {
   opened: boolean;
   onClose: () => void;
-  service: CartService | null;
-  onAddToCart: (service: CartService, quantity: number, customValues: CustomFieldValue[]) => Promise<void>;
+  service: Service | null;
+  onAddToCart: (service: Service, quantity: number, customValues: CustomFieldValue[]) => Promise<void>;
   loading: boolean;
 }
 
@@ -20,10 +20,10 @@ const AddToCartModal: React.FC<AddToCartModalProps> = ({
   loading,
 }) => {
   const [quantity, setQuantity] = useState(1);
-  const [customData, setCustomData] = useState<Record<string, any>>({});
+  const [customData, setCustomData] = useState<Record<string, CustomFieldValueType>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const customFields = service?.category?.custom_fields ?? [];
+  const customFields = (service as Service | null)?.category?.custom_fields ?? [];
 
   const handleSubmit = async () => {
     if (!service) return;

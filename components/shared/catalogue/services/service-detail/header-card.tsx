@@ -32,7 +32,7 @@ const HeaderCard = ({
       <Group justify="space-between" align="flex-start" wrap="wrap" gap="md">
         <Group gap="md" align="flex-start" wrap="nowrap">
           <ThemeIcon size={52} radius="md" variant="light" color={color}>
-            {categoryIcons[category.name as any] ?? <IconBriefcase size={26} />}
+            {categoryIcons[category.name] ?? <IconBriefcase size={26} />}
           </ThemeIcon>
           <Box>
             <Group gap="xs" mb={4} wrap="wrap">

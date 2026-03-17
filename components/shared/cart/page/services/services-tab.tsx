@@ -60,9 +60,9 @@ const ServiceView = ({
 
   if (serviceLoading || !service) return <ServiceViewSkeleton />;
 
-  const unitTotal = computeTotal(service as any);
-  const taxAmount = computeTax(service as any);
-  const unitSubtotal = computeSubtotal(service as any);
+  const unitTotal = computeTotal(service);
+  const taxAmount = computeTax(service);
+  const unitSubtotal = computeSubtotal(service);
   const isInclusive = service.sellable?.tax_type === "inclusive";
   const isTaxable = service.sellable?.tax_status === "taxable" && taxAmount > 0;
 

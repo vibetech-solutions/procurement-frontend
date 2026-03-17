@@ -126,7 +126,7 @@ export default function EditServicePage({ params }: EditServicePageProps) {
     if (specificationsEditor && service.specifications) {
       specificationsEditor.commands.setContent(service.specifications);
     }
-  }, [service, serviceTermsEditor, specificationsEditor]);
+  }, [service, serviceTermsEditor, specificationsEditor]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const supplierOptions = suppliers.map((s) => ({
     value: s.id.toString(),
@@ -150,7 +150,7 @@ export default function EditServicePage({ params }: EditServicePageProps) {
           service_id: parseInt(service_id),
           service_name: values.service_name,
           category_id: values.category_id,
-          suppliers: values.supplier_ids.map((id) => parseInt(id)) as any,
+          suppliers: values.supplier_ids.map((id) => parseInt(id)) as number[],
           description: values.description,
           price: values.base_price,
           specifications: values.specifications,
@@ -162,10 +162,11 @@ export default function EditServicePage({ params }: EditServicePageProps) {
         color: "green",
       });
       router.back();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { errors?: Record<string, string[]>; message?: string };
       const msg =
-        Object.values(error?.errors ?? {}).flat().join(". ") ||
-        error?.message ||
+        Object.values(err?.errors ?? {}).flat().join(". ") ||
+        err?.message ||
         "Failed to update service";
       notifications.show({ title: "Error", message: msg, color: "red" });
     }

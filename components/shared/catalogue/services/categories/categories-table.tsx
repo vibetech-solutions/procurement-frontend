@@ -12,7 +12,7 @@ const ServiceCategoriesTable = ({
   setCategoryModalOpen,
 }: ServiceCategoriesTableProps) => {
   const dispatch = useAppDispatch();
-  const { categories, categoriesLoading, pagination } = useAppSelector(
+  const { categories } = useAppSelector(
     (state) => state.service_categories,
   );
 
