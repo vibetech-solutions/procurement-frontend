@@ -64,6 +64,8 @@ import {
 import CustomFieldsForm from "@/components/shared/catalogue/custom-fields-form";
 import PageHeader from "@/components/shared/requisitions/create/page-header";
 import CreateRequisitionSteps from "../../../../components/shared/requisitions/create/steps/steps";
+import { useForm } from "@mantine/form";
+import { notifications } from "@mantine/notifications";
 
 export default function CreateRequisition() {
   const { products: cartProducts, productDetails } = useAppSelector(
@@ -368,6 +370,33 @@ export default function CreateRequisition() {
 
   const total = subtotal;
 
+  const requisitionForm = useForm({
+    mode: "controlled",
+    initialValues: {
+      title: "",
+      priority: "medium",
+      justification: "",
+      cost_center_id: null,
+      project_id: null,
+      location_id: null,
+      custom_receiver_name: "",
+      custom_receiver_phone: "",
+      custom_receiver_email: "",
+      custom_delivery_point: "",
+      custom_delivery_address: "",
+      delivery_date: "",
+      delivery_instructions: "",
+    },
+    validate: {
+      title: (value) => (value.trim().length > 0 ? null : "Title is required"),
+
+      priority: (value) =>
+        ["low", "medium", "high", "urgent"].includes(value)
+          ? null
+          : "Invalid priority",
+    },
+  });
+
   return (
     <Stack gap="lg">
       <PageHeader />
@@ -376,7 +405,6 @@ export default function CreateRequisition() {
         <CreateRequisitionSteps
           active={active}
           setActive={setActive}
-          projects={projects}
           useCustomDelivery={useCustomDelivery}
           setUseCustomDelivery={setUseCustomDelivery}
           users={users}
@@ -396,6 +424,7 @@ export default function CreateRequisition() {
           total={total}
           setEditServiceFormData={setEditServiceFormData}
           setEditServiceModalOpen={setEditServiceModalOpen}
+          requisitionForm={requisitionForm}
         />
 
         {active < 3 && (
@@ -407,7 +436,31 @@ export default function CreateRequisition() {
             >
               Back
             </Button>
-            <Button onClick={() => setActive(active + 1)}>
+            <Button
+              onClick={() => {
+                if (active === 2) {
+                  requisitionForm.onSubmit((values) => {
+                    console.log(values);
+                  })();
+                } else {
+                  const validation = requisitionForm.validate();
+
+                  if (validation.hasErrors) {
+                    const firstError = Object.values(validation.errors)[0];
+
+                    notifications.show({
+                      title: "Validation Error",
+                      message: firstError || "Please fill all required fields",
+                      color: "red",
+                    });
+
+                    return;
+                  }
+
+                  setActive(active + 1);
+                }
+              }}
+            >
               {active === 2 ? "Submit Requisition" : "Next Step"}
             </Button>
           </Group>

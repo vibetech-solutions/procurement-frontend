@@ -13,6 +13,9 @@ import requisitionsReducer from "./features/requisitions/requisitionsSlice";
 import productCategoriesReducer from "./features/products/categories/categoriesSlice";
 import serviceCategoriesReducer from "./features/services/categories/serviceCategoriesSlice";
 import suppliersReducer from "./features/suppliers/supplierSlice";
+import projectsReducer from "./features/projects/projectsSlice";
+import costCentersSlice from "./features/cost-centers/costCentersSlice";
+import locationsReducer from "./features/locations/locationsSlice";
 
 export const makeStore = () => {
   return configureStore({
@@ -23,6 +26,9 @@ export const makeStore = () => {
       products_cart: productsCartReducer,
       services_cart: servicesCartReducer,
       services: servicesReducer,
+      projects: projectsReducer,
+      cost_centers: costCentersSlice,
+      locations: locationsReducer,
       product_categories: productCategoriesReducer,
       service_categories: serviceCategoriesReducer,
       requisitions: requisitionsReducer,

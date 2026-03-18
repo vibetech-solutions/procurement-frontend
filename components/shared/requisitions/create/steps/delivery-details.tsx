@@ -1,3 +1,4 @@
+import { useAppSelector } from "@/lib/redux/hooks";
 import {
   Avatar,
   Card,
@@ -10,6 +11,7 @@ import {
   Textarea,
   TextInput,
 } from "@mantine/core";
+import { UseFormReturnType } from "@mantine/form";
 import React from "react";
 
 type DeliveryDetailsProps = {
@@ -19,6 +21,7 @@ type DeliveryDetailsProps = {
   selectedReceiver: string | null;
   setSelectedReceiver: (v: string | null) => void;
   selectedUser: User | undefined;
+  requisitionForm: UseFormReturnType<CreateRequisitionFormData>;
 };
 
 const DeliveryDetails = ({
@@ -28,7 +31,9 @@ const DeliveryDetails = ({
   selectedReceiver,
   setSelectedReceiver,
   selectedUser,
+  requisitionForm,
 }: DeliveryDetailsProps) => {
+  const { locations } = useAppSelector((state) => state.locations);
   return (
     <Stack gap="md" mt="xl">
       <Grid gutter="md">
@@ -45,56 +50,17 @@ const DeliveryDetails = ({
               <Select
                 label="Delivery Location"
                 placeholder="Select location"
-                data={[
-                  "Main Office - Building A",
-                  "Main Office - Building B",
-                  "Warehouse",
-                  "Remote Office",
-                ]}
-                required
+                data={locations.map((loc) => ({
+                  value: loc.id.toString(),
+                  label: loc.contact_name + " - " + loc.address,
+                }))}
+                key={requisitionForm.key("location_id")}
+                {...requisitionForm.getInputProps("location_id")}
               />
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6 }}>
               <TextInput label="Requested Delivery Date" type="date" required />
             </Grid.Col>
-            <Grid.Col span={12}>
-              <Select
-                label="Receiver"
-                placeholder="Select receiver"
-                data={users.map((user) => ({
-                  value: user.id.toString(),
-                  label: user.first_name + " " + user.last_name,
-                }))}
-                value={selectedReceiver}
-                onChange={setSelectedReceiver}
-                required
-              />
-            </Grid.Col>
-            {selectedUser && (
-              <Grid.Col span={12}>
-                <Card shadow="sm" padding="md" radius="md" withBorder>
-                  <Group gap="md">
-                    <Avatar size={40} radius="xl" color="cyan">
-                      {selectedUser.user_name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </Avatar>
-                    <div style={{ flex: 1 }}>
-                      <Text fw={500}>
-                        {selectedUser.first_name + selectedUser.last_name}
-                      </Text>
-                      <Text size="sm" c="dimmed">
-                        {selectedUser.email}
-                      </Text>
-                      <Text size="sm" c="dimmed">
-                        {selectedUser.phone}
-                      </Text>
-                    </div>
-                  </Group>
-                </Card>
-              </Grid.Col>
-            )}
             <Grid.Col span={12}>
               <Textarea
                 label="Special Delivery Instructions (Optional)"

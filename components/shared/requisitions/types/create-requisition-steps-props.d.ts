@@ -1,7 +1,6 @@
 type CreateRequisitionStepsProps = {
   active: number;
   setActive: (v: number) => void;
-  projects: ProjectOption[];
   useCustomDelivery: boolean;
   setUseCustomDelivery: (v: boolean) => void;
   users: User[];
@@ -21,4 +20,5 @@ type CreateRequisitionStepsProps = {
   total: number;
   setEditServiceFormData: (v: Record<string, CustomFieldValueType>) => void;
   setEditServiceModalOpen: (v: boolean) => void;
+  requisitionForm: UseFormReturnType<CreateRequisitionFormData>;
 };

@@ -8,7 +8,6 @@ import RequisitionCreated from "./completed";
 const CreateRequisitionSteps = ({
   active,
   setActive,
-  projects,
   useCustomDelivery,
   setUseCustomDelivery,
   users,
@@ -28,11 +27,12 @@ const CreateRequisitionSteps = ({
   total,
   setEditServiceFormData,
   setEditServiceModalOpen,
+  requisitionForm,
 }: CreateRequisitionStepsProps) => {
   return (
     <Stepper active={active} onStepClick={setActive}>
       <Stepper.Step label="Request Details" description="Basic information">
-        <RequestDetails projects={projects} />
+        <RequestDetails requisitionForm={requisitionForm} />
       </Stepper.Step>
 
       <Stepper.Step label="Delivery Details" description="Shipping information">
@@ -43,6 +43,7 @@ const CreateRequisitionSteps = ({
           selectedReceiver={selectedReceiver}
           setSelectedReceiver={setSelectedReceiver}
           selectedUser={selectedUser}
+          requisitionForm={requisitionForm}
         />
       </Stepper.Step>
 
