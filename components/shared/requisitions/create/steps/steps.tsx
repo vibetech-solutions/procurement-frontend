@@ -62,6 +62,9 @@ const CreateRequisitionSteps = ({
           setEditServiceFormData={setEditServiceFormData}
           setEditServiceModalOpen={setEditServiceModalOpen}
           items={items}
+          requisitionForm={requisitionForm}
+          useCustomDelivery={useCustomDelivery}
+          selectedUser={selectedUser}
         />
       </Stepper.Step>
 

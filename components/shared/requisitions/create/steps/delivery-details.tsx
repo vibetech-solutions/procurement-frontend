@@ -27,10 +27,6 @@ type DeliveryDetailsProps = {
 const DeliveryDetails = ({
   useCustomDelivery,
   setUseCustomDelivery,
-  users,
-  selectedReceiver,
-  setSelectedReceiver,
-  selectedUser,
   requisitionForm,
 }: DeliveryDetailsProps) => {
   const { locations } = useAppSelector((state) => state.locations);
@@ -59,13 +55,21 @@ const DeliveryDetails = ({
               />
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6 }}>
-              <TextInput label="Requested Delivery Date" type="date" required />
+              <TextInput
+                label="Delivery Date"
+                type="date"
+                required
+                key={requisitionForm.key("delivery_date")}
+                {...requisitionForm.getInputProps("delivery_date")}
+              />
             </Grid.Col>
             <Grid.Col span={12}>
               <Textarea
                 label="Special Delivery Instructions (Optional)"
                 placeholder="Any special requirements..."
                 rows={3}
+                key={requisitionForm.key("delivery_instructions")}
+                {...requisitionForm.getInputProps("delivery_instructions")}
               />
             </Grid.Col>
           </>
@@ -77,6 +81,8 @@ const DeliveryDetails = ({
                 label="Receiver Name"
                 placeholder="Enter receiver name"
                 required
+                key={requisitionForm.key("custom_receiver_name")}
+                {...requisitionForm.getInputProps("custom_receiver_name")}
               />
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6 }}>
@@ -84,6 +90,8 @@ const DeliveryDetails = ({
                 label="Receiver Phone"
                 placeholder="Enter phone number"
                 required
+                key={requisitionForm.key("custom_receiver_phone")}
+                {...requisitionForm.getInputProps("custom_receiver_phone")}
               />
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6 }}>
@@ -91,12 +99,16 @@ const DeliveryDetails = ({
                 label="Receiver Email"
                 placeholder="Enter email address"
                 required
+                key={requisitionForm.key("custom_receiver_email")}
+                {...requisitionForm.getInputProps("custom_receiver_email")}
               />
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6 }}>
               <TextInput
-                label="Department/Office"
-                placeholder="Enter department or office"
+                label="Pickup Point"
+                placeholder="Enter name of pickup point. Could be a building, department, or specific location within the organization."
+                key={requisitionForm.key("custom_delivery_point")}
+                {...requisitionForm.getInputProps("custom_delivery_point")}
               />
             </Grid.Col>
             <Grid.Col span={12}>
@@ -105,16 +117,26 @@ const DeliveryDetails = ({
                 placeholder="Enter complete delivery address"
                 rows={2}
                 required
+                key={requisitionForm.key("custom_delivery_address")}
+                {...requisitionForm.getInputProps("custom_delivery_address")}
               />
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6 }}>
-              <TextInput label="Requested Delivery Date" type="date" required />
+              <TextInput
+                label="Requested Delivery Date"
+                type="date"
+                required
+                key={requisitionForm.key("delivery_date")}
+                {...requisitionForm.getInputProps("delivery_date")}
+              />
             </Grid.Col>
             <Grid.Col span={12}>
               <Textarea
                 label="Special Delivery Instructions (Optional)"
                 placeholder="Any special requirements..."
                 rows={3}
+                key={requisitionForm.key("delivery_instructions")}
+                {...requisitionForm.getInputProps("delivery_instructions")}
               />
             </Grid.Col>
           </>

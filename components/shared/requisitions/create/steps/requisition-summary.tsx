@@ -27,7 +27,9 @@ import {
   IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
-import React from "react";
+import { UseFormReturnType } from "@mantine/form";
+import React, { useMemo } from "react";
+import { ProcurementProcessor } from "@/lib/utils/procurement-requisitions-processor";
 
 const Requisitionsummary = ({
   setAddItemModalOpen,
@@ -43,6 +45,9 @@ const Requisitionsummary = ({
   setEditServiceFormData,
   setEditServiceModalOpen,
   items,
+  requisitionForm,
+  useCustomDelivery,
+  selectedUser,
 }: {
   setAddItemModalOpen: (v: boolean) => void;
   viewingService: string | null;
@@ -57,6 +62,9 @@ const Requisitionsummary = ({
   setEditServiceFormData: (v: Record<string, CustomFieldValueType>) => void;
   setEditServiceModalOpen: (v: boolean) => void;
   items: RequisitionItem[];
+  requisitionForm: UseFormReturnType<CreateRequisitionFormData>;
+  useCustomDelivery: boolean;
+  selectedUser: User | undefined;
 }) => {
   const { products: cartProducts, productDetails } = useAppSelector(
     (state) => state.products_cart,
@@ -66,6 +74,35 @@ const Requisitionsummary = ({
     serviceDetails,
     servicesLoading,
   } = useAppSelector((state) => state.services_cart);
+
+  const { projects } = useAppSelector((state) => state.projects);
+  const { cost_centers } = useAppSelector((state) => state.cost_centers);
+  const { locations } = useAppSelector((state) => state.locations);
+
+  // Process items for procurement recommendations
+  const procurementAnalysis = useMemo(() => {
+    const processedItems = items.map((item) => ({
+      id: item.id,
+      name: item.name,
+      category: item.category || "Unknown",
+      quantity: item.quantity,
+      unitPrice: item.price,
+      totalPrice: item.price * item.quantity,
+    }));
+    return ProcurementProcessor.analyzeRequisition(processedItems);
+  }, [items]);
+
+  const selectedProject = projects.find(
+    (p) => p.id.toString() === requisitionForm.values.project_id?.toString(),
+  );
+  const selectedCostCenter = cost_centers.find(
+    (c) =>
+      c.id.toString() === requisitionForm.values.cost_center_id?.toString(),
+  );
+  const selectedLocation = locations.find(
+    (l) => l.id.toString() === requisitionForm.values.location_id?.toString(),
+  );
+
   return (
     <Stack gap="md" mt="xl">
       <Paper p="md" withBorder>
@@ -77,28 +114,69 @@ const Requisitionsummary = ({
             <Text size="xs" c="dimmed">
               Title
             </Text>
-            <Text size="sm">Q1 Office Equipment</Text>
+            <Text size="sm">
+              {requisitionForm.values.title || "Not specified"}
+            </Text>
           </Grid.Col>
           <Grid.Col span={6}>
             <Text size="xs" c="dimmed">
               Priority
             </Text>
-            <Badge size="sm" color="orange">
-              High
+            <Badge
+              size="sm"
+              color={
+                requisitionForm.values.priority === "urgent"
+                  ? "red"
+                  : requisitionForm.values.priority === "high"
+                    ? "orange"
+                    : requisitionForm.values.priority === "medium"
+                      ? "yellow"
+                      : "blue"
+              }
+            >
+              {requisitionForm.values.priority}
             </Badge>
           </Grid.Col>
           <Grid.Col span={6}>
             <Text size="xs" c="dimmed">
               Cost Center
             </Text>
-            <Text size="sm">IT</Text>
+            <Text size="sm">{selectedCostCenter?.name || "Not specified"}</Text>
+          </Grid.Col>
+          <Grid.Col span={6}>
+            <Text size="xs" c="dimmed">
+              Project
+            </Text>
+            <Text size="sm">{selectedProject?.name || "Not specified"}</Text>
           </Grid.Col>
           <Grid.Col span={6}>
             <Text size="xs" c="dimmed">
               Delivery Location
             </Text>
-            <Text size="sm">Main Office - Building A</Text>
+            <Text size="sm">
+              {useCustomDelivery
+                ? `${requisitionForm.values.custom_delivery_address || "Custom address"}`
+                : selectedLocation
+                  ? `${selectedLocation.contact_name} - ${selectedLocation.address}`
+                  : "Not specified"}
+            </Text>
           </Grid.Col>
+          <Grid.Col span={6}>
+            <Text size="xs" c="dimmed">
+              Delivery Date
+            </Text>
+            <Text size="sm">
+              {requisitionForm.values.delivery_date || "Not specified"}
+            </Text>
+          </Grid.Col>
+          {requisitionForm.values.justification && (
+            <Grid.Col span={12}>
+              <Text size="xs" c="dimmed">
+                Justification
+              </Text>
+              <Text size="sm">{requisitionForm.values.justification}</Text>
+            </Grid.Col>
+          )}
         </Grid>
       </Paper>
 
@@ -548,74 +626,292 @@ const Requisitionsummary = ({
             </Tabs.Panel>
 
             <Tabs.Panel value="recommended">
-              <Table highlightOnHover>
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th>Item</Table.Th>
-                    <Table.Th>Category</Table.Th>
-                    <Table.Th>Price</Table.Th>
-                    <Table.Th></Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {[
-                    {
-                      id: "REC-001",
-                      name: "Wireless Keyboard",
-                      category: "IT Equipment",
-                      price: 4500,
-                    },
-                    {
-                      id: "REC-002",
-                      name: "USB-C Hub",
-                      category: "IT Equipment",
-                      price: 3200,
-                    },
-                    {
-                      id: "REC-003",
-                      name: "Desk Organizer Set",
-                      category: "Office Supplies",
-                      price: 1800,
-                    },
-                    {
-                      id: "REC-004",
-                      name: "Monitor Stand",
-                      category: "Furniture",
-                      price: 6500,
-                    },
-                  ].map((rec) => (
-                    <Table.Tr key={rec.id}>
-                      <Table.Td>
-                        <Text size="sm" fw={500}>
-                          {rec.name}
+              <Tabs defaultValue="products">
+                <Tabs.List mb="md">
+                  <Tabs.Tab
+                    value="products"
+                    leftSection={<IconPackage size={14} />}
+                  >
+                    📦 Products
+                  </Tabs.Tab>
+                  <Tabs.Tab
+                    value="services"
+                    leftSection={<IconPlane size={14} />}
+                  >
+                    ✈️ Services
+                  </Tabs.Tab>
+                </Tabs.List>
+
+                <Tabs.Panel value="products">
+                  <Stack gap="md">
+                    <Group justify="space-between" mb="md">
+                      <div>
+                        <Text fw={600} c="blue">
+                          Suggest Products to Add to Catalog
                         </Text>
-                        <Text size="xs" c="dimmed">
-                          {rec.id}
+                        <Text size="sm" c="dimmed" mt="xs">
+                          Recommend new products for the system catalog. Catalog
+                          administrators will review and either create them as
+                          products or reject if duplicates exist.
                         </Text>
-                      </Table.Td>
-                      <Table.Td>
-                        <Badge variant="light" size="sm">
-                          {rec.category}
-                        </Badge>
-                      </Table.Td>
-                      <Table.Td>
-                        <Text size="sm" fw={600} c="cyan">
-                          {formatCurrency(rec.price)}
+                      </div>
+                      <Button size="sm" variant="light">
+                        + Add Product
+                      </Button>
+                    </Group>
+                    <Table>
+                      <Table.Thead>
+                        <Table.Tr>
+                          <Table.Th>Product Name</Table.Th>
+                          <Table.Th>Category</Table.Th>
+                          <Table.Th>Est. Unit Price</Table.Th>
+                          <Table.Th>Justification</Table.Th>
+                          <Table.Th>Status</Table.Th>
+                          <Table.Th></Table.Th>
+                        </Table.Tr>
+                      </Table.Thead>
+                      <Table.Tbody>
+                        <Table.Tr>
+                          <Table.Td>
+                            <Text size="sm" fw={500}>
+                              Adjustable Monitor Stand with USB Ports
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Badge size="sm" variant="light">
+                              Office Accessories
+                            </Badge>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="sm" fw={500}>
+                              KES 5,200
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="xs">
+                              Needed for ergonomic workstation setup
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Badge color="blue" size="sm">
+                              Pending Review
+                            </Badge>
+                          </Table.Td>
+                          <Table.Td>
+                            <ActionIcon color="red" variant="subtle" size="sm">
+                              <IconTrash size={14} />
+                            </ActionIcon>
+                          </Table.Td>
+                        </Table.Tr>
+                        <Table.Tr>
+                          <Table.Td>
+                            <Text size="sm" fw={500}>
+                              Wireless Keyboard & Mouse Set
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Badge size="sm" variant="light">
+                              Peripherals
+                            </Badge>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="sm" fw={500}>
+                              KES 3,500
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="xs">
+                              Required for remote work setup
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Badge color="green" size="sm">
+                              Approved
+                            </Badge>
+                          </Table.Td>
+                          <Table.Td>
+                            <ActionIcon
+                              color="red"
+                              variant="subtle"
+                              size="sm"
+                              disabled
+                            >
+                              <IconTrash size={14} />
+                            </ActionIcon>
+                          </Table.Td>
+                        </Table.Tr>
+                        <Table.Tr>
+                          <Table.Td>
+                            <Text size="sm" fw={500}>
+                              Portable Document Camera Scanner
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Badge size="sm" variant="light">
+                              IT Equipment
+                            </Badge>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="sm" fw={500}>
+                              KES 12,500
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="xs">
+                              For digitizing documents during meetings
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Badge color="red" size="sm">
+                              Rejected
+                            </Badge>
+                          </Table.Td>
+                          <Table.Td>
+                            <ActionIcon color="red" variant="subtle" size="sm">
+                              <IconTrash size={14} />
+                            </ActionIcon>
+                          </Table.Td>
+                        </Table.Tr>
+                      </Table.Tbody>
+                    </Table>
+                  </Stack>
+                </Tabs.Panel>
+
+                <Tabs.Panel value="services">
+                  <Stack gap="md">
+                    <Group justify="space-between" mb="md">
+                      <div>
+                        <Text fw={600} c="teal">
+                          Suggest Services to Add to Catalog
                         </Text>
-                      </Table.Td>
-                      <Table.Td>
-                        <Button
-                          size="xs"
-                          variant="light"
-                          leftSection={<IconPlus size={12} />}
-                        >
-                          Add
-                        </Button>
-                      </Table.Td>
-                    </Table.Tr>
-                  ))}
-                </Table.Tbody>
-              </Table>
+                        <Text size="sm" c="dimmed" mt="xs">
+                          Recommend new services for the system catalog. Catalog
+                          administrators will review and either create them as
+                          services or reject if duplicates exist.
+                        </Text>
+                      </div>
+                      <Button size="sm" variant="light">
+                        + Add Service
+                      </Button>
+                    </Group>
+                    <Table>
+                      <Table.Thead>
+                        <Table.Tr>
+                          <Table.Th>Service Name</Table.Th>
+                          <Table.Th>Category</Table.Th>
+                          <Table.Th>Est. Unit Price</Table.Th>
+                          <Table.Th>Justification</Table.Th>
+                          <Table.Th>Status</Table.Th>
+                          <Table.Th></Table.Th>
+                        </Table.Tr>
+                      </Table.Thead>
+                      <Table.Tbody>
+                        <Table.Tr>
+                          <Table.Td>
+                            <Text size="sm" fw={500}>
+                              Executive Car Rental (Weekly)
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Badge size="sm" variant="light">
+                              Transport
+                            </Badge>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="sm" fw={500}>
+                              KES 35,000
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="xs">
+                              For C-level executives attending conferences
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Badge color="blue" size="sm">
+                              Pending Review
+                            </Badge>
+                          </Table.Td>
+                          <Table.Td>
+                            <ActionIcon color="red" variant="subtle" size="sm">
+                              <IconTrash size={14} />
+                            </ActionIcon>
+                          </Table.Td>
+                        </Table.Tr>
+                        <Table.Tr>
+                          <Table.Td>
+                            <Text size="sm" fw={500}>
+                              Professional Venue Setup & Catering
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Badge size="sm" variant="light">
+                              Events
+                            </Badge>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="sm" fw={500}>
+                              KES 150,000
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="xs">
+                              For corporate team building events
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Badge color="green" size="sm">
+                              Approved
+                            </Badge>
+                          </Table.Td>
+                          <Table.Td>
+                            <ActionIcon
+                              color="red"
+                              variant="subtle"
+                              size="sm"
+                              disabled
+                            >
+                              <IconTrash size={14} />
+                            </ActionIcon>
+                          </Table.Td>
+                        </Table.Tr>
+                        <Table.Tr>
+                          <Table.Td>
+                            <Text size="sm" fw={500}>
+                              IT Infrastructure Audit Service
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Badge size="sm" variant="light">
+                              Professional Services
+                            </Badge>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="sm" fw={500}>
+                              KES 45,000
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="xs">
+                              For security and compliance assessment
+                            </Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Badge color="red" size="sm">
+                              Rejected
+                            </Badge>
+                          </Table.Td>
+                          <Table.Td>
+                            <ActionIcon color="red" variant="subtle" size="sm">
+                              <IconTrash size={14} />
+                            </ActionIcon>
+                          </Table.Td>
+                        </Table.Tr>
+                      </Table.Tbody>
+                    </Table>
+                  </Stack>
+                </Tabs.Panel>
+              </Tabs>
             </Tabs.Panel>
           </Tabs>
         )}

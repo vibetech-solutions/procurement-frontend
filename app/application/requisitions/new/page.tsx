@@ -38,6 +38,7 @@ import {
 } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import { useAppSelector, useAppDispatch } from "@/lib/redux/hooks";
+import type { RootState } from "@/lib/redux/store";
 import {
   getCartProducts,
   getCartProduct,
@@ -66,6 +67,7 @@ import PageHeader from "@/components/shared/requisitions/create/page-header";
 import CreateRequisitionSteps from "../../../../components/shared/requisitions/create/steps/steps";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
+import { ProcurementProcessor } from "@/lib/utils/procurement-requisitions-processor";
 
 export default function CreateRequisition() {
   const { products: cartProducts, productDetails } = useAppSelector(
@@ -125,11 +127,11 @@ export default function CreateRequisition() {
   const {
     products: catalogueProducts,
     productsLoading: catalogueProductsLoading,
-  } = useAppSelector((state) => state.products);
+  } = useAppSelector((state: RootState) => state.products);
   const {
     services: catalogueServices,
     servicesLoading: catalogueServicesLoading,
-  } = useAppSelector((state) => state.services);
+  } = useAppSelector((state: RootState) => state.services);
 
   const [internalSearch, setInternalSearch] = useState("");
   const [selectedInternalItem, setSelectedInternalItem] = useState<{
@@ -141,7 +143,7 @@ export default function CreateRequisition() {
   >({});
   const [activeModalTab, setActiveModalTab] = useState<string | null>("new");
 
-  const { users } = useAppSelector((state) => state.merchants);
+  const { users } = useAppSelector((state: RootState) => state.merchants);
 
   useEffect(() => {
     dispatch(fetchUsers());
@@ -394,8 +396,61 @@ export default function CreateRequisition() {
         ["low", "medium", "high", "urgent"].includes(value)
           ? null
           : "Invalid priority",
+      delivery_date: (value) => {
+        if (!value) return "Delivery date is required";
+      },
     },
   });
+
+  // Step-specific validation
+  const validateCurrentStep = (step: number) => {
+    const errors: Record<string, string> = {};
+
+    if (step === 0) {
+      // Request Details step - validate title and priority
+      if (!requisitionForm.values.title.trim()) {
+        errors.title = "Title is required";
+      }
+      if (
+        !["low", "medium", "high", "urgent"].includes(
+          requisitionForm.values.priority,
+        )
+      ) {
+        errors.priority = "Invalid priority";
+      }
+    } else if (step === 1) {
+      // Delivery Details step
+      if (useCustomDelivery) {
+        // Custom delivery - validate custom receiver fields
+        if (!requisitionForm.values.custom_receiver_name?.trim()) {
+          errors.custom_receiver_name = "Receiver name is required";
+        }
+        if (!requisitionForm.values.custom_receiver_phone?.trim()) {
+          errors.custom_receiver_phone = "Receiver phone is required";
+        }
+        if (!requisitionForm.values.custom_receiver_email?.trim()) {
+          errors.custom_receiver_email = "Receiver email is required";
+        }
+        if (!requisitionForm.values.custom_delivery_address?.trim()) {
+          errors.custom_delivery_address = "Delivery address is required";
+        }
+      } else {
+        // Standard delivery - validate delivery date and location
+        if (!requisitionForm.values.location_id) {
+          errors.location_id = "Delivery location is required";
+        }
+        if (!requisitionForm.values.delivery_date) {
+          errors.delivery_date = "Delivery date is required";
+        }
+      }
+    }
+    // Step 2 (Review & Submit) doesn't need validation as it's just a summary
+
+    return {
+      hasErrors: Object.keys(errors).length > 0,
+      errors,
+    };
+  };
 
   return (
     <Stack gap="lg">
@@ -439,11 +494,96 @@ export default function CreateRequisition() {
             <Button
               onClick={() => {
                 if (active === 2) {
-                  requisitionForm.onSubmit((values) => {
-                    console.log(values);
+                  // Final submission - validate all steps first
+                  const allValidations = [0, 1, 2].map((step) =>
+                    validateCurrentStep(step),
+                  );
+                  const hasAnyErrors = allValidations.some((v) => v.hasErrors);
+
+                  if (hasAnyErrors) {
+                    const allErrors = allValidations.flatMap((v) =>
+                      Object.values(v.errors),
+                    );
+                    notifications.show({
+                      title: "Validation Error",
+                      message:
+                        allErrors[0] || "Please fill all required fields",
+                      color: "red",
+                    });
+                    return;
+                  }
+
+                  // Process the requisition
+                  requisitionForm.onSubmit(async (values) => {
+                    try {
+                      // Prepare requisition data
+                      const requisitionData = {
+                        ...values,
+                        items: items.map((item) => ({
+                          id: item.id,
+                          name: item.name,
+                          quantity: item.quantity,
+                          price: item.price,
+                          category: item.category,
+                          description: item.description,
+                          custom_values: item.custom_values,
+                          isNew: item.isNew,
+                          addToCatalogue: item.addToCatalogue,
+                        })),
+                        cartProducts,
+                        cartServices,
+                        useCustomDelivery,
+                        selectedUser,
+                        totals: {
+                          subtotal,
+                          tax,
+                          total,
+                        },
+                      };
+
+                      console.log("📋 Requisition Data:", requisitionData);
+
+                      const processedItems = items.map((item) => ({
+                        id: item.id,
+                        name: item.name,
+                        category: item.category || "Unknown",
+                        quantity: item.quantity,
+                        unitPrice: item.price,
+                        totalPrice: item.price * item.quantity,
+                      }));
+
+                      const procurementResult =
+                        await ProcurementProcessor.processRequisition(
+                          `REQ-${Date.now()}`,
+                          processedItems,
+                        );
+
+                      console.log(
+                        "🔄 Procurement Processing Result:",
+                        procurementResult,
+                      );
+
+                      // Show success notification
+                      notifications.show({
+                        title: "Requisition Submitted Successfully",
+                        message: `Requisition created with ${procurementResult.inStockItems.length} items available in stock and ${procurementResult.outOfStockItems.length} items requiring RFQ.`,
+                        color: "green",
+                      });
+
+                      // Move to completion step
+                      setActive(3);
+                    } catch (error) {
+                      console.error("Failed to process requisition:", error);
+                      notifications.show({
+                        title: "Submission Failed",
+                        message:
+                          "An error occurred while processing your requisition. Please try again.",
+                        color: "red",
+                      });
+                    }
                   })();
                 } else {
-                  const validation = requisitionForm.validate();
+                  const validation = validateCurrentStep(active);
 
                   if (validation.hasErrors) {
                     const firstError = Object.values(validation.errors)[0];
