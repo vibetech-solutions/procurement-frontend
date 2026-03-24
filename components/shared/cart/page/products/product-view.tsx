@@ -40,7 +40,10 @@ const ProductView = ({ item }: { item: CartProduct }) => {
 
   const handleQuantityChange = (value: string | number) => {
     const quantity = Number(value);
-    if (quantity > 0) dispatch(updateCartProductQuantity({ product_id: item.product_id, quantity }));
+    if (quantity > 0)
+      dispatch(
+        updateCartProductQuantity({ product_id: item.product_id, quantity }),
+      );
   };
 
   const handleRemove = () => {
@@ -78,7 +81,7 @@ const ProductView = ({ item }: { item: CartProduct }) => {
               {product.id} • {product.category.name}
             </Text>
             <Text size="xs" c="dimmed" mt={4}>
-              Supplier: {product.suppliers[0].company_name}
+              Supplier: {product.suppliers[0]?.company_name ?? "N/A"}
             </Text>
           </div>
 
@@ -106,7 +109,8 @@ const ProductView = ({ item }: { item: CartProduct }) => {
                 </Text>
                 {isTaxable && (
                   <Text size="xs" c="dimmed" mt={2}>
-                    +{formatCurrency(taxAmount)} tax ({isInclusive ? "incl." : "excl."})
+                    +{formatCurrency(taxAmount)} tax (
+                    {isInclusive ? "incl." : "excl."})
                   </Text>
                 )}
               </div>
@@ -125,7 +129,12 @@ const ProductView = ({ item }: { item: CartProduct }) => {
               </div>
             </Group>
 
-            <ActionIcon variant="subtle" color="red" size="lg" onClick={handleRemove}>
+            <ActionIcon
+              variant="subtle"
+              color="red"
+              size="lg"
+              onClick={handleRemove}
+            >
               <IconTrash size={18} />
             </ActionIcon>
           </Group>
