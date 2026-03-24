@@ -4,14 +4,16 @@ import {
   Badge,
   Button,
   Card,
+  Group,
   Stack,
   Table,
   Tabs,
   Text,
   Title,
 } from "@mantine/core";
-import { IconTrash } from "@tabler/icons-react";
-import React from "react";
+import { IconPlus, IconTrash } from "@tabler/icons-react";
+import React, { useState } from "react";
+import RecommendItemModal from "./recommend-item-modal";
 
 const RecommendedItemsTab = () => {
   const { user } = useAppSelector((state) => state.auth);
@@ -21,20 +23,16 @@ const RecommendedItemsTab = () => {
 
   const isMerchant = user?.roles?.[0]?.name === "MERCHANT";
 
-  const getItemType = (item: any) => {
-    if (item.category_type === "product_category" || item.product_category) {
-      return "Product";
-    }
-    if (item.category_type === "service_category" || item.service_category) {
-      return "Service";
-    }
-    return "Unknown";
+  const [modalOpen, setModalOpen] = useState(false);
+  const [itemType, setItemType] = useState<"goods" | "services">("goods");
+
+  const handleClose = () => {
+    setModalOpen(false);
+    setItemType("goods");
   };
 
-  const getItemTypeColor = (item: any) => {
-    const type = getItemType(item);
-    return type === "Product" ? "violet" : "cyan";
-  };
+  const getItemTypeColor = (item: any) =>
+    item.type === "product" ? "violet" : "cyan";
 
   return (
     <Tabs.Panel value="recommended" pt="md">
@@ -51,6 +49,17 @@ const RecommendedItemsTab = () => {
               : "These are items you've suggested to be added to the system catalog. The catalog administrators will review them and decide whether to add them."}
           </Text>
         </div>
+
+        {!isMerchant && (
+          <Group justify="flex-end">
+            <Button
+              leftSection={<IconPlus size={16} />}
+              onClick={() => setModalOpen(true)}
+            >
+              Add Item
+            </Button>
+          </Group>
+        )}
 
         <Card shadow="sm" padding="lg" radius="md" withBorder>
           <Table>
@@ -84,13 +93,13 @@ const RecommendedItemsTab = () => {
                         variant="filled"
                         color={getItemTypeColor(item)}
                       >
-                        {getItemType(item)}
+                        {item.type === "product" ? "Product" : "Service"}
                       </Badge>
                     </Table.Td>
                     <Table.Td>
                       <Badge size="sm" variant="light">
-                        {item.product_category?.name ||
-                          item.service_category?.name ||
+                        {item.product_category?.name ??
+                          item.service_category?.name ??
                           "Uncategorized"}
                       </Badge>
                     </Table.Td>
@@ -152,6 +161,13 @@ const RecommendedItemsTab = () => {
           </Table>
         </Card>
       </Stack>
+
+      <RecommendItemModal
+        modalOpen={modalOpen}
+        handleClose={handleClose}
+        itemType={itemType}
+        setItemType={setItemType}
+      />
     </Tabs.Panel>
   );
 };

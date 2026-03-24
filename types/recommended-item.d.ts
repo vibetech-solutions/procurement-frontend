@@ -11,4 +11,5 @@ type RecommendedItem = {
   service?: Service;
   product_category?: ProductCategory;
   service_category?: ServiceCategory;
+  type?: "product" | "service";
 };
