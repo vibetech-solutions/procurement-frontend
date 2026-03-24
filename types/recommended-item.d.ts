@@ -1,4 +1,5 @@
 type RecommendedItem = {
+  id: number;
   company: User;
   recommender: User;
   name: string;
@@ -7,5 +8,7 @@ type RecommendedItem = {
   description?: string;
   specifications?: string;
   product?: Product;
-  services?: Service;
+  service?: Service;
+  product_category?: ProductCategory;
+  service_category?: ServiceCategory;
 };
