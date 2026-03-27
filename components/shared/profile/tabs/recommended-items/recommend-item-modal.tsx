@@ -36,23 +36,10 @@ const RecommendItemModal = ({
           </Tabs.Tab>
         </Tabs.List>
 
-        <RecommendProductsForm />
+        <RecommendProductsForm onClose={handleClose} />
 
-        <RecommendedServicesForm />
+        <RecommendedServicesForm onClose={handleClose} />
       </Tabs>
-
-      <Group justify="flex-end" gap="sm" mt="md">
-        <Button variant="outline" onClick={handleClose}>
-          Cancel
-        </Button>
-        <Button
-          onClick={() => {
-            /* TODO: dispatch recommend item action */
-          }}
-        >
-          Submit Recommendation
-        </Button>
-      </Group>
     </Modal>
   );
 };

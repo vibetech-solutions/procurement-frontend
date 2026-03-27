@@ -1,7 +1,9 @@
 import { fetchServiceCategories } from "@/lib/redux/features/services/categories/serviceCategoriesSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import {
+  Button,
   Grid,
+  Group,
   NumberInput,
   Select,
   Tabs,
@@ -12,27 +14,49 @@ import React, { useEffect, useState } from "react";
 import EditorSection from "../editor-section";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { useForm } from "@mantine/form";
 
-const RecommendedServicesForm = () => {
+const RecommendedServicesForm = ({ onClose }: { onClose: () => void }) => {
   const {
     categories: serviceCategories,
     categoriesLoading: serviceCategoriesLoading,
   } = useAppSelector((state) => state.service_categories);
   const dispatch = useAppDispatch();
-  useEffect(() => {
-    dispatch(fetchServiceCategories(1));
-  }, [dispatch]);
+
+  const [attachments, setAttachments] = useState<File[]>([]);
+
+  const form = useForm({
+    mode: "uncontrolled",
+    initialValues: {
+      name: "",
+      category_id: "",
+      price: 0,
+      description: "",
+      requirements: "",
+    },
+  });
+
   const editor = useEditor({
     extensions: [StarterKit],
     content: "",
     immediatelyRender: false,
+    onUpdate({ editor }) {
+      form.setFieldValue("requirements", editor.getHTML());
+    },
   });
-
-  const [attachments, setAttachments] = useState<File[]>([]);
 
   const handleAttachments = (files: File[]) => {
     setAttachments((prev) => [...prev, ...files]);
   };
+
+  const handleSubmit = form.onSubmit((values) => {
+    console.log("BALYUS", { ...values, attachments });
+  });
+
+  useEffect(() => {
+    dispatch(fetchServiceCategories(1));
+  }, [dispatch]);
+
   return (
     <Tabs.Panel value="services" pt="md">
       <Grid gutter="md">
@@ -41,6 +65,8 @@ const RecommendedServicesForm = () => {
             label="Service Name"
             placeholder="Enter service name"
             required
+            key={form.key("name")}
+            {...form.getInputProps("name")}
           />
         </Grid.Col>
         <Grid.Col span={6}>
@@ -53,6 +79,8 @@ const RecommendedServicesForm = () => {
             }))}
             disabled={serviceCategoriesLoading}
             required
+            key={form.key("category_id")}
+            {...form.getInputProps("category_id")}
           />
         </Grid.Col>
         <Grid.Col span={6}>
@@ -62,6 +90,8 @@ const RecommendedServicesForm = () => {
             min={0}
             thousandSeparator=","
             required
+            key={form.key("price")}
+            {...form.getInputProps("price")}
           />
         </Grid.Col>
         <Grid.Col span={12}>
@@ -69,6 +99,8 @@ const RecommendedServicesForm = () => {
             label="Service Description"
             placeholder="Brief description of the service"
             rows={2}
+            key={form.key("description")}
+            {...form.getInputProps("description")}
           />
         </Grid.Col>
         <EditorSection
@@ -80,6 +112,13 @@ const RecommendedServicesForm = () => {
           handleAttachments={handleAttachments}
         />
       </Grid>
+
+      <Group justify="flex-end" gap="sm" mt="md">
+        <Button variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button onClick={() => handleSubmit()}>Submit Recommendation</Button>
+      </Group>
     </Tabs.Panel>
   );
 };
